@@ -1,162 +1,210 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { fetchActivity, fetchSystemOverview } from "@/lib/mockApi";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useAuth } from "@/context/AuthContext";
 
-function formatTime(iso: string) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleString();
+const tx = "transition-[color,background-color,box-shadow,transform] duration-250 ease-out";
+
+function firstName(name: string | undefined) {
+  if (!name?.trim()) return "there";
+  return name.trim().split(/\s+/)[0] ?? "there";
 }
 
 export function HomePage() {
+  const { user } = useAuth();
   const overview = useQuery({ queryKey: ["overview"], queryFn: fetchSystemOverview });
   const activity = useQuery({ queryKey: ["activity"], queryFn: fetchActivity });
 
+  const welcome = firstName(user?.name);
+  const paramCount = overview.data?.environments.parameterCount ?? 13;
+
+  const downloadActivity = activity.data?.filter((a) => a.kind === "download") ?? [];
+
   if (overview.isLoading) {
     return (
-      <div className="space-y-[var(--s-400)]">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid gap-[var(--s-400)] md:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-40" />
-          ))}
+      <div className="space-y-[var(--s-500)]">
+        <Skeleton className="h-10 w-72" />
+        <div className="grid gap-[var(--s-500)] lg:grid-cols-[1fr_minmax(260px,320px)]">
+          <div className="space-y-[var(--s-400)]">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+          <div className="space-y-[var(--s-400)]">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
         </div>
-        <Skeleton className="h-56" />
       </div>
     );
   }
 
   if (overview.isError || !overview.data) {
     return (
-      <Card title="System">
-        <p className="text-[14px] text-[var(--text-error-default)]">Failed to load system overview.</p>
+      <Card title="Dashboard">
+        <p className="text-[14px] text-[var(--text-error-default)]">Failed to load dashboard.</p>
       </Card>
     );
   }
 
-  const o = overview.data;
-
   return (
-    <div className="space-y-[var(--s-500)]">
+    <div className="space-y-[var(--s-600)] pb-[var(--s-400)]">
       <header>
-        <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-          System overview
-        </p>
-        <h1 className="mt-[var(--s-200)] text-[32px] font-semibold leading-[40px] tracking-[-0.5px] text-[var(--text-default-heading)]">
-          Physical AI control plane
+        <h1 className="text-[clamp(1.5rem,2.5vw,1.75rem)] font-semibold leading-tight text-[var(--text-default-heading)]">
+          Welcome back, {welcome}
         </h1>
-        <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] leading-[20px] text-[var(--text-default-body)]">
-          Environments, assets, generation jobs, and API surface. Structured outputs: simulation-ready USD.
-        </p>
       </header>
 
-      <div className="grid gap-[var(--s-400)] md:grid-cols-2">
-        <Card title="Environments">
-          <dl className="grid grid-cols-2 gap-[var(--s-300)] text-[14px]">
-            <div>
-              <dt className="text-[var(--text-default-body)]">Active</dt>
-              <dd className="font-semibold text-[var(--text-default-heading)]">{o.environments.activeCount}</dd>
+      <div className="grid gap-[var(--s-500)] lg:grid-cols-[1fr_minmax(260px,340px)] lg:items-start lg:gap-[var(--s-600)]">
+        <div className="space-y-[var(--s-500)]">
+          <section className="rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-400)] sm:p-[var(--s-500)]">
+            <div className="flex items-start gap-[var(--s-300)]">
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-br100 bg-[var(--surface-primary-default-subtle)] text-[var(--papaya-500)]"
+                aria-hidden
+              >
+                <span className="material-symbols-outlined text-[24px]">layers</span>
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Kitchen Environment</h2>
+                <p className="mt-[var(--s-200)] text-[14px] leading-[20px] text-[var(--text-default-body)]">
+                  Configure, generate, and download physics-ready kitchen environments for robotic manipulation training.
+                </p>
+              </div>
             </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Parameters</dt>
-              <dd className="font-semibold">{o.environments.parameterCount}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Combinations (max)</dt>
-              <dd className="font-semibold">{o.environments.availableCombinations}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Last generated</dt>
-              <dd className="font-mono text-[12px]">{formatTime(o.environments.lastGeneratedAt)}</dd>
-            </div>
-          </dl>
-        </Card>
 
-        <Card title="Assets">
-          <dl className="grid grid-cols-2 gap-[var(--s-300)] text-[14px]">
-            <div>
-              <dt className="text-[var(--text-default-body)]">Props</dt>
-              <dd className="font-semibold">{o.assets.propsCount}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Materials</dt>
-              <dd className="font-semibold">{o.assets.materialsCount}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">SimReady coverage</dt>
-              <dd className="font-semibold">{o.assets.simReadyPercent}%</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Articulated props</dt>
-              <dd className="font-semibold">{o.assets.articulatedCount}</dd>
-            </div>
-          </dl>
-        </Card>
-
-        <Card title="Generation">
-          <dl className="grid grid-cols-2 gap-[var(--s-300)] text-[14px]">
-            <div>
-              <dt className="text-[var(--text-default-body)]">Completed</dt>
-              <dd className="font-semibold">{o.generation.jobsCompleted}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Running</dt>
-              <dd className="font-semibold">{o.generation.jobsRunning}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Failed</dt>
-              <dd className="font-semibold text-[var(--text-error-default)]">{o.generation.jobsFailed}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Last job</dt>
-              <dd className="font-semibold uppercase">{o.generation.lastJobStatus}</dd>
-            </div>
-          </dl>
-        </Card>
-
-        <Card title="API">
-          <dl className="grid grid-cols-2 gap-[var(--s-300)] text-[14px]">
-            <div>
-              <dt className="text-[var(--text-default-body)]">Status</dt>
-              <dd className="font-semibold capitalize">{o.api.status}</dd>
-            </div>
-            <div>
-              <dt className="text-[var(--text-default-body)]">Keys</dt>
-              <dd className="font-semibold">{o.api.keyCount}</dd>
-            </div>
-            <div className="col-span-2">
-              <dt className="text-[var(--text-default-body)]">Usage (window)</dt>
-              <dd className="font-mono text-[12px]">{o.api.usageSummary}</dd>
-            </div>
-          </dl>
-        </Card>
-      </div>
-
-      <Card title="Activity feed">
-        {activity.isLoading ? (
-          <div className="space-y-[var(--s-200)]">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-        ) : activity.data?.length === 0 ? (
-          <p className="text-[14px] text-[var(--text-default-body)]">No system activity recorded.</p>
-        ) : (
-          <ul className="divide-y divide-[var(--border-default-secondary)]">
-            {activity.data?.map((a) => (
-              <li key={a.id} className="flex flex-col gap-[var(--s-100)] py-[var(--s-300)] first:pt-0 last:pb-0">
-                <div className="flex items-center justify-between gap-[var(--s-400)]">
-                  <span className="text-[12px] font-mono text-[var(--text-default-body)]">
-                    {new Date(a.at).toLocaleString()}
-                  </span>
-                  <span className="text-[10px] uppercase text-[var(--text-default-placeholder)]">{a.kind}</span>
+            <div className="mt-[var(--s-500)] flex flex-wrap gap-x-[var(--s-600)] gap-y-[var(--s-400)] border-t border-[var(--border-default-secondary)] pt-[var(--s-500)]">
+              {(
+                [
+                  { value: "35", label: "Layout presets" },
+                  { value: "18", label: "Appliances" },
+                  { value: "24+", label: "Style variants" },
+                  { value: String(paramCount), label: "Parameters" },
+                ] as const
+              ).map((s) => (
+                <div key={s.label} className="min-w-[72px]">
+                  <p className="text-[28px] font-semibold leading-none tracking-tight text-[var(--text-default-heading)]">
+                    {s.value}
+                  </p>
+                  <p className="mt-[var(--s-100)] text-[12px] text-[var(--text-default-body)]">{s.label}</p>
                 </div>
-                <p className="text-[14px] text-[var(--text-default-heading)]">{a.message}</p>
-                {a.meta ? <p className="text-[12px] text-[var(--text-default-body)]">{a.meta}</p> : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+              ))}
+            </div>
+
+            <Link
+              to="/environments/kitchen/configure"
+              className={`mt-[var(--s-500)] flex w-full items-center justify-center gap-[var(--s-200)] rounded-br100 bg-[var(--surface-primary-default)] px-[var(--s-400)] py-[var(--s-300)] text-[15px] font-medium text-[var(--text-on-color-body)] hover:bg-[var(--surface-primary-default-hover)] active:scale-[0.99] ${tx}`}
+            >
+              Configure environment
+              <span className="material-symbols-outlined text-[20px]" aria-hidden>
+                arrow_forward
+              </span>
+            </Link>
+
+            <div className="mt-[var(--s-400)] flex flex-wrap gap-x-[var(--s-500)] gap-y-[var(--s-200)] text-[13px]">
+              <Link
+                to="/batch"
+                className={`inline-flex items-center gap-[var(--s-200)] text-[var(--text-default-body)] hover:text-[var(--text-default-heading)] ${tx}`}
+              >
+                <span className="material-symbols-outlined text-[18px] text-[var(--text-default-placeholder)]">
+                  inventory_2
+                </span>
+                Batch variations
+              </Link>
+              <Link
+                to="/api"
+                className={`inline-flex items-center gap-[var(--s-200)] text-[var(--text-default-body)] hover:text-[var(--text-default-heading)] ${tx}`}
+              >
+                <span className="material-symbols-outlined text-[18px] text-[var(--text-default-placeholder)]">
+                  code
+                </span>
+                API documentation
+              </Link>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Recent activity</h2>
+            <div className="mt-[var(--s-300)] rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-400)] sm:p-[var(--s-500)]">
+              {activity.isLoading ? (
+                <Skeleton className="h-16 w-full" />
+              ) : downloadActivity.length === 0 ? (
+                <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">
+                  No downloads yet. Configure your first kitchen environment to get started.{" "}
+                  <Link
+                    to="/environments/kitchen/configure"
+                    className="font-medium text-[var(--text-primary-default)] underline-offset-2 hover:underline"
+                  >
+                    Go to Kitchen Environment
+                  </Link>
+                </p>
+              ) : (
+                <ul className="divide-y divide-[var(--border-default-secondary)]">
+                  {downloadActivity.slice(0, 5).map((a) => (
+                    <li key={a.id} className="py-[var(--s-300)] first:pt-0 last:pb-0">
+                      <p className="text-[13px] text-[var(--text-default-body)]">
+                        {new Date(a.at).toLocaleString()}
+                      </p>
+                      <p className="mt-[var(--s-100)] text-[14px] text-[var(--text-default-heading)]">{a.message}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        </div>
+
+        <aside className="flex flex-col gap-[var(--s-400)] lg:sticky lg:top-[calc(3.5rem+var(--s-400)+env(safe-area-inset-top))]">
+          <Card className="p-[var(--s-400)] sm:p-[var(--s-500)]">
+            <div className="flex items-start gap-[var(--s-300)]">
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-br100 border border-[#7eb8ff]/40 bg-[#e8f2ff] text-[#2563eb]"
+                aria-hidden
+              >
+                <span className="material-symbols-outlined text-[22px]">deployed_code</span>
+              </span>
+              <div>
+                <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Asset library</h2>
+                <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
+                  Browse props and materials with physics properties, collision meshes, and SimReady tier classifications.
+                </p>
+                <Link
+                  to="/assets/props"
+                  className={`mt-[var(--s-400)] inline-flex items-center gap-0.5 text-[14px] font-medium text-[var(--text-primary-default)] hover:underline ${tx}`}
+                >
+                  Browse assets
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </Link>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-[var(--s-400)] sm:p-[var(--s-500)]">
+            <div className="flex items-start gap-[var(--s-300)]">
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-br100 border border-[#e8b8ff]/50 bg-[#f6edff] text-[#9333ea]"
+                aria-hidden
+              >
+                <span className="material-symbols-outlined text-[22px]">auto_awesome</span>
+              </span>
+              <div>
+                <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">SimReady generation</h2>
+                <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
+                  Convert any 3D model into a simulation-ready USD asset with physics and articulation.
+                </p>
+                <Link
+                  to="/simready"
+                  className={`mt-[var(--s-400)] inline-flex items-center gap-0.5 text-[14px] font-medium text-[var(--text-primary-default)] hover:underline ${tx}`}
+                >
+                  Learn more
+                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </Link>
+              </div>
+            </div>
+          </Card>
+        </aside>
+      </div>
     </div>
   );
 }

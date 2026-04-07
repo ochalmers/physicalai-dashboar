@@ -31,7 +31,7 @@ export function KitchenConfiguratorPage() {
         <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
           Environment · Kitchen
         </p>
-        <h1 className="mt-[var(--s-200)] text-[28px] font-semibold text-[var(--text-default-heading)]">
+        <h1 className="text-page-title mt-[var(--s-200)]">
           Kitchen configurator
         </h1>
         <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">

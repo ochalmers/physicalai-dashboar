@@ -33,6 +33,12 @@ export default {
         br100: "var(--br-100)",
         br200: "var(--br-200)",
       },
+      transitionDuration: {
+        250: "250ms",
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
     },
   },
   plugins: [],

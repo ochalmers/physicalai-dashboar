@@ -35,7 +35,7 @@ export function ApiDocsPage() {
         <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
           API
         </p>
-        <h1 className="mt-[var(--s-200)] text-[28px] font-semibold text-[var(--text-default-heading)]">
+        <h1 className="text-page-title mt-[var(--s-200)]">
           HTTP surface
         </h1>
         <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">
@@ -48,14 +48,17 @@ export function ApiDocsPage() {
           {keys.isLoading ? <Skeleton className="h-24" /> : null}
           <ul className="space-y-[var(--s-200)] text-[13px]">
             {keys.data?.map((k) => (
-              <li key={k.id} className="flex items-center justify-between gap-[var(--s-300)] border-b border-[var(--border-default-secondary)] py-[var(--s-200)] last:border-0">
-                <div>
+              <li
+                key={k.id}
+                className="flex flex-col gap-[var(--s-200)] border-b border-[var(--border-default-secondary)] py-[var(--s-300)] last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--s-300)] sm:py-[var(--s-200)]"
+              >
+                <div className="min-w-0">
                   <div className="font-medium">{k.label}</div>
-                  <div className="font-mono text-[12px] text-[var(--text-default-body)]">
+                  <div className="break-all font-mono text-[12px] text-[var(--text-default-body)]">
                     {k.prefix}••••••••
                   </div>
                 </div>
-                <Button variant="secondary" onClick={() => revoke.mutate(k.id)}>
+                <Button variant="secondary" className="w-full shrink-0 sm:w-auto" onClick={() => revoke.mutate(k.id)}>
                   Revoke
                 </Button>
               </li>
@@ -83,7 +86,7 @@ export function ApiDocsPage() {
         </Card>
 
         <Card title="Endpoints">
-          <ul className="space-y-[var(--s-200)] font-mono text-[12px] text-[var(--text-default-heading)]">
+          <ul className="space-y-[var(--s-200)] break-words font-mono text-[12px] text-[var(--text-default-heading)]">
             <li>POST {BASE}/configs</li>
             <li>POST {BASE}/variations/generate</li>
             <li>GET {BASE}/jobs/{"{id}"}</li>

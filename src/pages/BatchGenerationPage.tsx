@@ -77,7 +77,7 @@ export function BatchGenerationPage() {
         <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
           Generation
         </p>
-        <h1 className="mt-[var(--s-200)] text-[28px] font-semibold text-[var(--text-default-heading)]">
+        <h1 className="text-page-title mt-[var(--s-200)]">
           Batch generation
         </h1>
         <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">
@@ -106,7 +106,7 @@ export function BatchGenerationPage() {
                                 key={opt}
                                 type="button"
                                 onClick={() => toggleValue(key, opt)}
-                                className={`rounded-br100 border px-[var(--s-300)] py-[var(--s-100)] text-[12px] ${
+                                className={`rounded-br100 border px-[var(--s-300)] py-[var(--s-100)] text-[12px] transition-[color,background-color,border-color] duration-250 ease-out ${
                                   active
                                     ? "border-[var(--border-primary-default)] bg-[var(--surface-primary-default-subtle)] text-[var(--text-default-heading)]"
                                     : "border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-[var(--text-default-body)]"

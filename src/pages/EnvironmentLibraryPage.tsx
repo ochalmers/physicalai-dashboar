@@ -15,7 +15,7 @@ export function EnvironmentLibraryPage() {
         <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
           Environment library
         </p>
-        <h1 className="mt-[var(--s-200)] text-[28px] font-semibold text-[var(--text-default-heading)]">
+        <h1 className="text-page-title mt-[var(--s-200)]">
           Environments
         </h1>
         <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">
@@ -40,7 +40,7 @@ export function EnvironmentLibraryPage() {
                   <Badge variant="neutral">soon</Badge>
                 )}
               </div>
-              <dl className="grid grid-cols-2 gap-[var(--s-200)] text-[13px] text-[var(--text-default-body)]">
+              <dl className="grid grid-cols-1 gap-[var(--s-200)] text-[13px] text-[var(--text-default-body)] min-[400px]:grid-cols-2">
                 <div>
                   <dt>Parameters</dt>
                   <dd className="font-semibold text-[var(--text-default-heading)]">{e.parameterCount}</dd>

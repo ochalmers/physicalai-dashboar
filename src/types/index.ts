@@ -1,16 +1,23 @@
 export type SimReadyTier = "certified" | "pending" | "unsupported";
 
-export type CollisionType = "convex_hull" | "sdf";
+export type CollisionType = "convex_hull" | "sdf" | "convex_decomposition";
 
 export type ArticulationType = "fixed" | "revolute" | "prismatic" | "compound";
+
+/** Card / modal tag row (reference UI) */
+export type PropTagKind = "manipulation" | "articulated" | "navigation";
 
 export interface PropAsset {
   id: string;
   name: string;
   category: string;
   simReady: SimReadyTier;
+  /** Top tag on cards (Manipulation / Articulated / Navigation) */
+  tag: PropTagKind;
   massKg: number;
   collision: CollisionType;
+  /** Human-readable collision label for detail modal */
+  collisionLabel: string;
   articulationJoints: number;
   articulationType: ArticulationType;
   materialType: string;
@@ -23,6 +30,10 @@ export interface PropAsset {
     restitution: number;
     collisionMarginMm: number;
   };
+  /** Bounding box in mm for modal */
+  dimensionsMm: { w: number; h: number; d: number };
+  /** Density kg/m³ for modal */
+  densityKgM3: number;
 }
 
 export interface MaterialRecord {
@@ -33,6 +44,8 @@ export interface MaterialRecord {
   dynamicFriction: number;
   restitution: number;
   densityKgM3: number;
+  /** Optional preview for library cards */
+  thumbnailUrl?: string;
 }
 
 export interface EnvironmentEntity {

@@ -19,7 +19,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center rounded-br100 px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium transition-colors disabled:opacity-50 ${v} ${className}`}
+      className={`inline-flex items-center justify-center rounded-br100 px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-250 ease-out disabled:opacity-50 active:scale-[0.99] ${v} ${className}`}
       {...rest}
     />
   );
