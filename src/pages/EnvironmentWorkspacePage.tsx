@@ -1,6 +1,7 @@
 import { Link, NavLink, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -352,15 +353,58 @@ export function EnvironmentWorkspacePage() {
     return <Navigate to={`/environments/${meta.slug}/batch`} replace />;
   }
 
-  return (
-    <div className="space-y-[var(--s-400)]">
-      <section className="relative overflow-hidden rounded-br200 border border-[var(--border-default-secondary)]">
-        <img src={meta.heroImage} alt={`${meta.name}`} className="h-[220px] w-full object-cover md:h-[260px]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
-      </section>
+  const gatedShell = meta.status === "live" ? "" : "pointer-events-none select-none";
 
-      <div className="relative">
-        <div className={meta.status === "live" ? "" : "pointer-events-none select-none opacity-45 blur-[3px] saturate-75"}>
+  /**
+   * Full-access veil must render via `createPortal(document.body)`: `PageTransition` applies
+   * `transform` for route enter animation, which creates a containing block — `position: fixed`
+   * inside the page tree would only cover the max-width content column, not the full main pane.
+   */
+  const fullAccessVeil =
+    meta.status !== "live" && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[48] flex items-center justify-center bg-[rgba(255,255,255,0.68)] px-[var(--s-300)] backdrop-blur-[10px] sm:px-[var(--s-400)] md:left-[272px]"
+            role="presentation"
+          >
+            <div
+              className="w-full max-w-[430px] rounded-br200 border border-[#ececec] bg-[var(--surface-default)] px-[var(--s-500)] py-[var(--s-500)] shadow-[0_10px_24px_rgba(0,0,0,0.14)]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="full-access-title"
+            >
+              <h2
+                id="full-access-title"
+                className="text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[var(--text-default-heading)]"
+              >
+                Full Access Required
+              </h2>
+              <div className="mt-[var(--s-300)] space-y-[var(--s-200)] text-left text-[15px] leading-[1.55] text-[var(--text-default-body)]">
+                <p>{meta.name} environments are available with full platform access.</p>
+                <p>Contact our team to enable access.</p>
+              </div>
+              <Button
+                variant="primary"
+                className="mt-[var(--s-400)] h-[42px] w-full rounded-br100 text-[14px] font-semibold"
+                onClick={() => setTalkOpen(true)}
+              >
+                Talk to Team
+              </Button>
+            </div>
+          </div>,
+          document.body
+        )
+      : null;
+
+  return (
+    <>
+      <div className="space-y-[var(--s-400)]">
+        <div className={gatedShell}>
+          <section className="relative overflow-hidden rounded-br200 border border-[var(--border-default-secondary)]">
+            <img src={meta.heroImage} alt={`${meta.name}`} className="h-[220px] w-full object-cover md:h-[260px]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
+          </section>
+
           <PageHeader
             title={
               <span className="inline-flex items-center gap-[var(--s-200)]">
@@ -377,22 +421,9 @@ export function EnvironmentWorkspacePage() {
           <WorkspaceNav environmentSlug={meta.slug} />
           <WorkspacePanel section={activeSection} environmentSlug={meta.slug} />
         </div>
-        {meta.status !== "live" ? (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-br200 bg-[var(--surface-default)]/68 backdrop-blur-md">
-            <div className="mx-[var(--s-300)] w-full max-w-[560px] rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] py-[calc(var(--s-500)+var(--s-100))] shadow-lg sm:px-[calc(var(--s-500)+var(--s-100))]">
-              <p className="text-[26px] font-semibold leading-[1.2] tracking-[-0.01em] text-[var(--text-default-heading)]">Full Access Required</p>
-              <div className="mt-[var(--s-300)] space-y-[var(--s-300)] text-left text-[16px] leading-[27px] text-[var(--text-default-body)]">
-                <p>{meta.name} environments are available with full platform access.</p>
-                <p>Contact our team to enable access.</p>
-              </div>
-              <Button variant="primary" className="mt-[var(--s-400)] w-full" onClick={() => setTalkOpen(true)}>
-                Talk to Team
-              </Button>
-            </div>
-          </div>
-        ) : null}
       </div>
+      {fullAccessVeil}
       <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
-    </div>
+    </>
   );
 }
