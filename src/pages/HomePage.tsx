@@ -82,7 +82,7 @@ export function HomePage() {
       ) : null}
 
       <section className="space-y-[var(--s-300)]">
-        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Scenes</h2>
+        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Environments</h2>
         <div className="grid gap-[var(--s-300)] sm:grid-cols-2 xl:grid-cols-5">
           {[
             { name: "Kitchen", href: "/environments/kitchen/batch", img: "/assets/environments/kitchen.jpg", live: true },
