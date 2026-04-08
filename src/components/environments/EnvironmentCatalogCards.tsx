@@ -16,12 +16,21 @@ const heroActive =
 const txPrimaryCta =
   "inline-flex items-center justify-center gap-[var(--s-200)] rounded-br100 bg-[var(--surface-primary-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-on-color-body)] transition-[background-color,opacity,transform] duration-250 ease-out hover:bg-[var(--surface-primary-default-hover)] active:scale-[0.99]";
 
+function environmentPath(id: string): string {
+  if (id === "env-kitchen-v2") return "/environments/kitchen/batch";
+  if (id.startsWith("env-living")) return "/environments/living-room/batch";
+  if (id.startsWith("env-warehouse")) return "/environments/warehouse/batch";
+  if (id.startsWith("env-retail")) return "/environments/retail-store/batch";
+  return "/environments/kitchen/batch";
+}
+
 type EnvironmentCatalogCardsProps = {
   environments: EnvironmentEntity[];
   accessTier: AccessTier;
   /** Show dashed “Request a Custom Scene” tile (hide on `/environments/request-custom`) */
   showRequestCard?: boolean;
   requestCustomHref?: string;
+  onRequestCustom?: () => void;
 };
 
 export function EnvironmentCatalogCards({
@@ -29,6 +38,7 @@ export function EnvironmentCatalogCards({
   accessTier,
   showRequestCard = true,
   requestCustomHref = "/environments/request-custom",
+  onRequestCustom,
 }: EnvironmentCatalogCardsProps) {
   const fullExport = canUseFeature(accessTier, "full_export");
 
@@ -36,7 +46,7 @@ export function EnvironmentCatalogCards({
     <div className="grid gap-[var(--s-400)] sm:grid-cols-2 xl:grid-cols-3">
       {environments.map((e) => {
         const isActive = e.status === "active";
-        const title = `${e.name} Environment`;
+        const title = e.name;
         const description =
           e.catalogDescription ??
           (isActive
@@ -44,18 +54,25 @@ export function EnvironmentCatalogCards({
             : "We are building this environment. Get notified when it is ready.");
         const eyebrow = e.catalogEyebrow;
         const icon = e.catalogIcon ?? "view_in_ar";
+        const thumbnailUrl = e.catalogThumbnailUrl;
 
         return (
           <article key={e.id} className={cardShell}>
             <div className={isActive ? heroActive : heroSoon}>
+              {thumbnailUrl ? (
+                <>
+                  <img
+                    src={thumbnailUrl}
+                    alt={`${e.name} environment`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/15 to-black/25" />
+                </>
+              ) : null}
               <div className="absolute left-[var(--s-300)] top-[var(--s-300)] z-[1]">
-                {isActive ? (
-                  <Badge variant="live">Available</Badge>
-                ) : (
-                  <Badge variant="soon">Coming Soon</Badge>
-                )}
+                {isActive ? <Badge variant="live">Live</Badge> : <Badge variant="warning">In progress</Badge>}
               </div>
-              {isActive ? (
+              {isActive && !thumbnailUrl ? (
                 <span
                   className="material-symbols-outlined text-[64px] text-[var(--papaya-500)]/90"
                   aria-hidden
@@ -82,29 +99,16 @@ export function EnvironmentCatalogCards({
               <p className="flex-1 text-[13px] leading-[20px] text-[var(--text-default-body)]">{description}</p>
 
               <div className="pt-[var(--s-100)]">
-                {isActive && e.id === "env-kitchen-v2" ? (
-                  <Link to="/environments/kitchen/configure" className={txPrimaryCta}>
-                    Open Kitchen
-                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                      arrow_forward
-                    </span>
-                  </Link>
-                ) : null}
-                {isActive && e.id !== "env-kitchen-v2" ? (
-                  <Link to="/environments" className={txPrimaryCta}>
-                    Open
-                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                      arrow_forward
-                    </span>
-                  </Link>
-                ) : null}
+                <Link to={environmentPath(e.id)} className={txPrimaryCta}>
+                  {e.id === "env-kitchen-v2" ? "Open Kitchen" : "Open"}
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                    arrow_forward
+                  </span>
+                </Link>
                 {!isActive ? (
-                  <button
-                    type="button"
-                    className={`text-[13px] font-medium text-[var(--text-default-body)] underline underline-offset-2 hover:text-[var(--text-default-heading)] ${tx}`}
-                  >
-                    Get notified
-                  </button>
+                  <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">
+                    Workspace is available while this environment is being finalized.
+                  </p>
                 ) : null}
               </div>
             </div>
@@ -113,8 +117,7 @@ export function EnvironmentCatalogCards({
       })}
 
       {showRequestCard ? (
-        <Link
-          to={requestCustomHref}
+        <div
           className={`${cardShell} border-2 border-dashed border-[var(--border-primary-default)] transition-[background-color,box-shadow] duration-200 hover:bg-[var(--surface-primary-default-subtle)]`}
         >
           <div className="relative flex min-h-[140px] shrink-0 items-center justify-center border-b border-dashed border-[var(--border-primary-default)] bg-[var(--surface-default)] md:min-h-[160px]">
@@ -131,15 +134,24 @@ export function EnvironmentCatalogCards({
               Need a specific environment for your training pipeline? Tell us what you need.
             </p>
             <div className="pt-[var(--s-100)]">
-              <span className={txPrimaryCta}>
-                Submit Request
-                <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                  arrow_forward
-                </span>
-              </span>
+              {onRequestCustom ? (
+                <button type="button" className={txPrimaryCta} onClick={onRequestCustom}>
+                  Submit Request
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                    arrow_forward
+                  </span>
+                </button>
+              ) : (
+                <Link to={requestCustomHref} className={txPrimaryCta}>
+                  Submit Request
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                    arrow_forward
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
-        </Link>
+        </div>
       ) : null}
     </div>
   );

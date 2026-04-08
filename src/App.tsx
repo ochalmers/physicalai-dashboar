@@ -7,6 +7,7 @@ import { PropsPage } from "@/pages/PropsPage";
 import { MaterialsPage } from "@/pages/MaterialsPage";
 import { EnvironmentLibraryPage } from "@/pages/EnvironmentLibraryPage";
 import { KitchenConfiguratorPage } from "@/pages/KitchenConfiguratorPage";
+import { EnvironmentWorkspacePage } from "@/pages/EnvironmentWorkspacePage";
 import { BatchGenerationPage } from "@/pages/BatchGenerationPage";
 import { ApiDocsPage } from "@/pages/ApiDocsPage";
 import { SimReadyPage } from "@/pages/SimReadyPage";
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/assets/props" element={<PropsPage />} />
           <Route path="/assets/materials" element={<MaterialsPage />} />
           <Route path="/environments" element={<EnvironmentLibraryPage />} />
+          <Route path="/environments/:environmentSlug/:section" element={<EnvironmentWorkspacePage />} />
           <Route path="/environments/kitchen/configure" element={<KitchenConfiguratorPage />} />
           <Route path="/environments/request-custom" element={<RequestCustomPage />} />
           <Route path="/batch" element={<BatchGenerationPage />} />

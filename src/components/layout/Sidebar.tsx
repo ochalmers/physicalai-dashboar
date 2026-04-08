@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { tx, txSidebarSlide } from "./motion";
+import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
+import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
 
 /** Sidebar chrome — screenshot ~#121212 */
 const shell = "bg-[#121212] border-r border-[#2a2a2a]";
@@ -14,6 +16,33 @@ function cn(...parts: (string | false | undefined)[]) {
 const navRow =
   "max-md:min-h-[44px] max-md:items-center max-md:active:bg-[#252525] md:py-[var(--s-200)]";
 
+const envItems = [
+  {
+    label: "Kitchen",
+    to: "/environments/kitchen/batch",
+    dot: "bg-[var(--green-500)]",
+    thumbnail: "/assets/environments/kitchen.jpg",
+  },
+  {
+    label: "Living Room",
+    to: "/environments/living-room/batch",
+    dot: "bg-[#eab308]",
+    thumbnail: "/assets/environments/livingroom.png",
+  },
+  {
+    label: "Warehouse",
+    to: "/environments/warehouse/batch",
+    dot: "bg-[#eab308]",
+    thumbnail: "/assets/environments/warehouse.png",
+  },
+  {
+    label: "Retail Store",
+    to: "/environments/retail-store/batch",
+    dot: "bg-[#eab308]",
+    thumbnail: "/assets/environments/store.png",
+  },
+] as const;
+
 type SidebarProps = {
   mobileOpen: boolean;
   onClose: () => void;
@@ -23,6 +52,8 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const [assetOpen, setAssetOpen] = useState(false);
   const [envOpen, setEnvOpen] = useState(true);
+  const [talkOpen, setTalkOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   useEffect(() => {
     const p = location.pathname;
@@ -49,7 +80,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         mobileOpen ? "translate-x-0 shadow-2xl shadow-black/40" : "-translate-x-full md:translate-x-0",
       )}
     >
-      <div className="relative flex shrink-0 items-center justify-center px-[var(--s-400)] pb-[var(--s-200)] pt-[max(var(--s-400),env(safe-area-inset-top))] md:pb-0 md:pt-[var(--s-500)]">
+      <div className="relative flex shrink-0 items-center justify-center px-[var(--s-400)] py-[var(--s-300)] pt-[max(var(--s-300),env(safe-area-inset-top))] md:py-[var(--s-400)] md:pt-[max(var(--s-400),env(safe-area-inset-top))]">
         <Link
           to="/"
           onClick={afterNav}
@@ -62,7 +93,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           type="button"
           aria-label="Close menu"
           onClick={onClose}
-          className={`absolute right-[var(--s-300)] top-[max(var(--s-300),env(safe-area-inset-top))] flex min-h-[44px] min-w-[44px] items-center justify-center text-[#b0b0b0] hover:bg-[#1a1a1a] hover:text-white active:scale-[0.97] md:hidden ${tx}`}
+          className={`absolute right-[var(--s-300)] top-[max(var(--s-200),env(safe-area-inset-top))] flex min-h-[44px] min-w-[44px] items-center justify-center text-[#b0b0b0] hover:bg-[#1a1a1a] hover:text-white active:scale-[0.97] md:hidden ${tx}`}
         >
           <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
@@ -221,64 +252,42 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           </div>
           {envOpen ? (
             <div className={cn(subIndent, "flex flex-col gap-[2px] py-[var(--s-100)]")}>
-              <NavLink
-                to="/environments/kitchen/configure"
-                onClick={afterNav}
-                className={({ isActive }) =>
-                  cn(
-                    tx,
-                    "flex items-center justify-between gap-[var(--s-200)] py-[10px] text-[13px] md:py-[6px]",
-                    isActive ? "font-medium text-[var(--papaya-500)]" : "text-[#a3a3a3] hover:text-[#d4d4d4]",
-                  )
-                }
+              {envItems.map((item) => (
+                <NavLink
+                  key={item.label}
+                  to={item.to}
+                  onClick={afterNav}
+                  className={({ isActive }) =>
+                    cn(
+                      tx,
+                      "flex items-center justify-between gap-[var(--s-200)] py-[10px] text-[13px] md:py-[6px]",
+                      isActive ? "font-medium text-[var(--papaya-500)]" : "text-[#a3a3a3] hover:text-[#d4d4d4]",
+                    )
+                  }
+                >
+                  <span className="flex min-w-0 items-center gap-[var(--s-200)]">
+                    <img
+                      src={item.thumbnail}
+                      alt=""
+                      className="h-5 w-5 shrink-0 rounded-[4px] object-cover"
+                      aria-hidden
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </span>
+                  <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", item.dot)} />
+                </NavLink>
+              ))}
+              <button
+                type="button"
+                onClick={() => setRequestOpen(true)}
+                className={cn(
+                  tx,
+                  "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
+                  "text-[#a3a3a3] hover:text-[#d4d4d4]",
+                )}
               >
-                <span>Kitchen</span>
-                <span className="shrink-0 rounded-full bg-[#0d2a1a] px-[8px] py-[3px] text-[10px] font-semibold uppercase leading-none tracking-wide text-[var(--green-500)]">
-                  Live
-                </span>
-              </NavLink>
-              <div className="flex min-h-[40px] items-center justify-between py-[6px] text-[13px] text-[#666666] md:min-h-0">
-                <span>Living Room</span>
-                <span className="rounded-full bg-[#2a2a2a] px-[8px] py-[3px] text-[10px] font-semibold uppercase leading-none text-[#a3a3a3]">
-                  Soon
-                </span>
-              </div>
-              <div className="flex min-h-[40px] items-center justify-between py-[6px] text-[13px] text-[#666666] md:min-h-0">
-                <span>Warehouse</span>
-                <span className="rounded-full bg-[#2a2a2a] px-[8px] py-[3px] text-[10px] font-semibold uppercase leading-none text-[#a3a3a3]">
-                  Soon
-                </span>
-              </div>
-              <NavLink
-                to="/environments/request-custom"
-                onClick={afterNav}
-                className={({ isActive }) =>
-                  cn(
-                    tx,
-                    "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
-                    isActive
-                      ? "font-medium text-[var(--papaya-500)]"
-                      : "text-[#a3a3a3] hover:text-[#d4d4d4]",
-                  )
-                }
-              >
-                Request Custom
-              </NavLink>
-              <NavLink
-                to="/batch"
-                onClick={afterNav}
-                className={({ isActive }) =>
-                  cn(
-                    tx,
-                    "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
-                    isActive
-                      ? "font-medium text-[var(--papaya-500)]"
-                      : "text-[#a3a3a3] hover:text-[#d4d4d4]",
-                  )
-                }
-              >
-                Batch variations
-              </NavLink>
+                + New
+              </button>
             </div>
           ) : null}
         </div>
@@ -290,24 +299,55 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           className={({ isActive }) =>
             cn(
               tx,
-              "flex items-center justify-between gap-[var(--s-200)] px-[var(--s-300)] text-[14px] leading-snug",
+              "group flex items-center justify-between gap-[var(--s-200)] px-[var(--s-300)] text-[14px] leading-snug",
               navRow,
-              "bg-[#1a1a1a]/80 hover:bg-[#222222]",
-              isActive ? "ring-1 ring-[var(--papaya-500)]/40" : "",
+              isActive
+                ? "bg-[#1e1e1e] text-[var(--papaya-500)] shadow-[inset_3px_0_0_0_var(--papaya-500)]"
+                : cn(muted, "hover:bg-[#1a1a1a] hover:text-[#b0b0b0]"),
             )
           }
         >
-          <span className="flex items-center gap-[var(--s-300)] text-[var(--papaya-500)]">
-            <span className="material-symbols-outlined text-[20px] text-[var(--papaya-500)]">auto_awesome</span>
-            SimReady
-          </span>
-          <span className="shrink-0 rounded-full bg-[#2a2a2a] px-[8px] py-[3px] text-[10px] font-semibold uppercase leading-none text-[#a3a3a3]">
-            Soon
-          </span>
+          {({ isActive }) => (
+            <span className="flex items-center gap-[var(--s-300)]">
+              <span
+                className={cn(
+                  "material-symbols-outlined text-[20px] transition-colors duration-250 ease-out",
+                  isActive ? "text-[var(--papaya-500)]" : "text-[#888888] group-hover:text-[#b0b0b0]",
+                )}
+              >
+                auto_awesome
+              </span>
+              <span>SimReady</span>
+            </span>
+          )}
         </NavLink>
 
         {/* Footer nav */}
         <div className="mt-auto flex flex-col gap-[2px] border-t border-[#2a2a2a] pt-[var(--s-500)]">
+          <button
+            type="button"
+            onClick={() => setTalkOpen(true)}
+            className={cn(
+              tx,
+              "mx-[var(--s-300)] mb-[var(--s-300)] flex items-center justify-between rounded-full bg-[#1b1b1b] px-[10px] py-[8px] text-[13px] text-[#f2f2f2] hover:bg-[#202020]",
+            )}
+            aria-label="Need help"
+          >
+            <span className="inline-flex items-center -space-x-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1b1b1b] bg-[#7c5cff] text-[10px] font-semibold text-white">
+                AK
+              </span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1b1b1b] bg-[#14b8a6] text-[10px] font-semibold text-white">
+                RS
+              </span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1b1b1b] bg-[#f97316] text-[10px] font-semibold text-white">
+                MO
+              </span>
+            </span>
+            <span className="font-medium text-[13px] leading-none">Need help?</span>
+            <span className="h-2.5 w-2.5 rounded-full bg-[#10b981]" />
+          </button>
+
           <NavLink
             to="/api"
             onClick={afterNav}
@@ -366,6 +406,8 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           </NavLink>
         </div>
       </nav>
+      <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
+      <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
     </aside>
   );
 }

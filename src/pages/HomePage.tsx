@@ -9,6 +9,8 @@ import { useAuth } from "@/context/AuthContext";
 import { canUseFeature } from "@/lib/access";
 
 const tx = "transition-[color,background-color,box-shadow,transform] duration-250 ease-out";
+const teaserShell =
+  "group relative overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)]";
 
 function firstName(name: string | undefined) {
   if (!name?.trim()) return "there";
@@ -75,6 +77,83 @@ export function HomePage() {
         </Callout>
       ) : null}
 
+      <section className="space-y-[var(--s-300)]">
+        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Explore libraries</h2>
+        <div className="grid gap-[var(--s-400)] md:grid-cols-3">
+          <Link to="/assets" className={teaserShell}>
+            <img
+              src="/assets/Props/Base Cabinet 600mm.png"
+              alt="All assets"
+              className="h-[180px] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/15" />
+            <div className="absolute inset-x-[var(--s-300)] bottom-[var(--s-300)] z-[1]">
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-white/80">All</p>
+              <p className="mt-[var(--s-100)] text-[24px] font-semibold leading-tight text-white">Assets</p>
+              <p className="mt-[var(--s-100)] text-[13px] text-white/85">
+                Open combined view with Props and Materials cards.
+              </p>
+            </div>
+          </Link>
+
+          <Link to="/assets/props" className={teaserShell}>
+            <img
+              src="/assets/Props/Dining Chair.png"
+              alt="Props library"
+              className="h-[180px] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-black/10" />
+            <div className="absolute inset-x-[var(--s-300)] bottom-[var(--s-300)] z-[1]">
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-white/80">Library</p>
+              <p className="mt-[var(--s-100)] text-[24px] font-semibold leading-tight text-white">Props</p>
+              <p className="mt-[var(--s-100)] text-[13px] text-white/85">Collision-ready objects for manipulation and navigation.</p>
+            </div>
+          </Link>
+
+          <Link to="/assets/materials" className={teaserShell}>
+            <img
+              src="/assets/Materials/Carrara Marble.png"
+              alt="Materials library"
+              className="h-[180px] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-black/10" />
+            <div className="absolute inset-x-[var(--s-300)] bottom-[var(--s-300)] z-[1]">
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-white/80">Library</p>
+              <p className="mt-[var(--s-100)] text-[24px] font-semibold leading-tight text-white">Materials</p>
+              <p className="mt-[var(--s-100)] text-[13px] text-white/85">Physics and PBR surface presets for reliable simulation.</p>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      <section className="space-y-[var(--s-300)]">
+        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Environments</h2>
+        <div className="grid gap-[var(--s-300)] sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { name: "Kitchen", href: "/environments/kitchen/batch", img: "/assets/environments/kitchen.jpg", live: true },
+            {
+              name: "Living Room",
+              href: "/environments/living-room/batch",
+              img: "/assets/environments/livingroom.png",
+              live: false,
+            },
+            { name: "Warehouse", href: "/environments/warehouse/batch", img: "/assets/environments/warehouse.png", live: false },
+            { name: "Retail Store", href: "/environments/retail-store/batch", img: "/assets/environments/store.png", live: false },
+          ].map((env) => (
+            <Link key={env.name} to={env.href} className={teaserShell}>
+              <img src={env.img} alt={env.name} className="h-[130px] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-black/10" />
+              <div className="absolute left-[var(--s-200)] top-[var(--s-200)]">
+                <span className={`inline-flex h-2.5 w-2.5 rounded-full ${env.live ? "bg-[var(--green-500)]" : "bg-[#eab308]"}`} />
+              </div>
+              <div className="absolute inset-x-[var(--s-200)] bottom-[var(--s-200)] z-[1]">
+                <p className="text-[16px] font-semibold text-white">{env.name}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <div className="grid gap-[var(--s-500)] lg:grid-cols-[1fr_minmax(260px,340px)] lg:items-start lg:gap-[var(--s-600)]">
         <div className="space-y-[var(--s-500)]">
           <section className="rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-400)] sm:p-[var(--s-500)]">
@@ -87,7 +166,7 @@ export function HomePage() {
               </span>
               <div className="min-w-0 flex-1">
                 <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">
-                  Kitchen Environment
+                  Kitchen
                 </h2>
                 <p className="mt-[var(--s-200)] text-[14px] leading-[20px] text-[var(--text-default-body)]">
                   Parameterized kitchen scenes for manipulation and sim validation.

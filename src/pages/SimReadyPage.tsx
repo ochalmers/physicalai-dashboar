@@ -1,8 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { PageHeader } from "@/components/layout/PageHeader";
-import { Callout } from "@/components/system/Callout";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 export function SimReadyPage() {
@@ -10,74 +6,51 @@ export function SimReadyPage() {
   const [sent, setSent] = useState(false);
 
   return (
-    <div className="space-y-[var(--s-500)]">
-      <PageHeader
-        title={
-          <span className="inline-flex items-center gap-[var(--s-300)]">
-            <span className="material-symbols-outlined text-[32px] text-[var(--text-primary-default)]" aria-hidden>
-              auto_awesome
-            </span>
-            SimReady
-          </span>
-        }
-        description={
-          <>
-            <p>
-              Upload meshes (GLB, OBJ, FBX) and receive a physics-ready USD asset: collision proxies, material bindings,
-              articulation metadata, and SimReady tier validation.
-            </p>
-            <p className="mt-[var(--s-200)]">Private preview — join the waitlist for availability.</p>
-          </>
-        }
-      />
-
-      <Callout variant="info" title="Roadmap">
-        <p>
-          In-product batch processing is not available yet.{" "}
-          <Link to="/environments/request-custom" className="font-medium text-[var(--text-primary-default)] underline underline-offset-2">
-            Contact us
-          </Link>{" "}
-          for custom pipelines.
+    <section className="mx-auto flex min-h-[70vh] w-full max-w-[940px] items-center justify-center px-[var(--s-300)] py-[var(--s-700)]">
+      <div className="w-full text-center">
+        <span
+          className="material-symbols-outlined text-[56px] leading-none text-[var(--text-default-placeholder)]"
+          aria-hidden
+        >
+          auto_awesome
+        </span>
+        <h1 className="mt-[var(--s-300)] text-[42px] font-semibold leading-[1.1] tracking-tight text-[var(--text-default-heading)]">
+          SimReady Generation
+        </h1>
+        <p className="mx-auto mt-[var(--s-400)] max-w-[760px] text-[17px] leading-[32px] text-[var(--text-default-body)]">
+          Upload any 3D model (GLB, OBJ, FBX) and our pipeline will convert it into a physics-ready SimReady USD asset
+          with collision meshes, material properties, and articulation.
         </p>
-      </Callout>
+        <p className="mt-[var(--s-300)] text-[16px] text-[var(--text-default-placeholder)]">
+          Currently in private beta. Join the waitlist to get notified.
+        </p>
 
-      <Card title="Pipeline output">
-        <ol className="list-decimal space-y-[var(--s-200)] pl-[var(--s-500)] text-[14px] text-[var(--text-default-body)]">
-          <li>Ingest mesh package + textures + manifest</li>
-          <li>Repair, scale checks, collision proxy</li>
-          <li>Validate against SimReady tier rules</li>
-          <li>Deliver OpenUSD + sidecar metadata</li>
-        </ol>
-      </Card>
-
-      <Card title="Waitlist">
         {sent ? (
-          <p className="text-[14px] text-[var(--text-success-default)]">Recorded. You will be contacted when slots open.</p>
+          <p className="mt-[var(--s-500)] text-[15px] font-medium text-[var(--text-success-default)]">
+            You are on the waitlist. We will notify you when access opens.
+          </p>
         ) : (
           <form
-            className="flex flex-col gap-[var(--s-300)] sm:flex-row sm:items-end"
+            className="mx-auto mt-[var(--s-500)] flex max-w-[760px] flex-col gap-[var(--s-200)] sm:flex-row"
             onSubmit={(e) => {
               e.preventDefault();
               setSent(true);
             }}
           >
-            <label className="flex flex-1 flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
-              Email
-              <input
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px]"
-              />
-            </label>
-            <Button variant="primary" type="submit">
-              Join waitlist
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="h-[62px] flex-1 rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-400)] text-[16px] text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)]"
+            />
+            <Button variant="primary" type="submit" className="h-[62px] px-[var(--s-500)] text-[16px] font-semibold">
+              Join Waitlist
             </Button>
           </form>
         )}
-      </Card>
-    </div>
+      </div>
+    </section>
   );
 }

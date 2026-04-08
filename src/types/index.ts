@@ -65,6 +65,8 @@ export interface EnvironmentEntity {
   catalogEyebrow?: string;
   /** Body copy on the library card */
   catalogDescription?: string;
+  /** Environment thumbnail image shown on library cards */
+  catalogThumbnailUrl?: string;
 }
 
 export interface SystemOverview {

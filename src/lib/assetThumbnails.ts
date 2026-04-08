@@ -306,19 +306,74 @@ function fallbackThumb(label: string): string {
   );
 }
 
-/** Local PNGs in `public/catalog/props/{id}.png` (see `assets/Props` source). */
+/** Local PNGs in `assets/Props` resolved by catalog id. */
 export function catalogPropUrl(id: string): string {
-  return `/catalog/props/${id}.png`;
+  const fileById: Record<string, string> = {
+    "prop-bar-stool": "Bar Stool.png",
+    "prop-base-cab-600": "Base Cabinet 600mm.png",
+    "prop-oven-bi": "Built-in Oven.png",
+    "prop-dinner-plate": "Ceramic Dinner Plate.png",
+    "prop-planter-ceramic": "Ceramic Planter.png",
+    "prop-coffee-machine": "Coffee Machine.png",
+    "prop-dining-chair": "Dining Chair.png",
+    "prop-dining-table": "Dining Table.png",
+    "prop-dishwasher": "Dishwasher.png",
+    "prop-drawer-900": "Drawer Base Unit 900mm.png",
+    "prop-floor-lamp": "Floor Lamp.png",
+    "prop-fridge-freezer": "Fridge-Freezer.png",
+    "prop-mortar": "Marble Mortar and Pestle.png",
+    "prop-mason-jar": "Mason Jar.png",
+    "prop-microwave": "Microwave.png",
+    "prop-oak-cutting-board": "Oak Cutting Board.png",
+    "prop-pendant": "Pendant Light.png",
+    "prop-blinds": "Roller Blinds.png",
+    "prop-sofa-3": "Sofa 3-Seater.png",
+    "prop-spice-rack": "Spice Rack.png",
+    "prop-mixing-bowl": "Stainless Steel Mixing Bowl.png",
+    "prop-stemless-wine": "Stainless Steel Wine Glass Set.png",
+    "prop-pantry-tall": "Tall Pantry Cabinet.png",
+    "prop-wall-cab-800": "Wall Cabinet 800mm.png",
+  };
+  const fileName = fileById[id];
+  if (!fileName) {
+    return "";
+  }
+  return `/assets/Props/${encodeURIComponent(fileName)}`;
 }
 
-/** Local PNGs in `public/catalog/materials/{id}.png` (see `assets/Materials` source). */
+/** Local PNGs in `assets/Materials` resolved by catalog id. */
 export function catalogMaterialUrl(id: string): string {
-  return `/catalog/materials/${id}.png`;
+  const fileById: Record<string, string> = {
+    "mat-brushed-aluminum": "Brushed Aluminum.png",
+    "mat-carpet": "Carpet.png",
+    "mat-carrara-marble": "Carrara Marble.png",
+    "mat-cast-iron": "Cast Iron.png",
+    "mat-ceramic-tile": "Ceramic Tile.png",
+    "mat-clear-glass": "Clear Glass.png",
+    "mat-frosted-glass": "Frosted Glass.png",
+    "mat-granite": "Granite.png",
+    "mat-leather": "Leather.png",
+    "mat-oak-wood": "Oak Wood.png",
+    "mat-pine-wood": "Pine Wood.png",
+    "mat-porcelain": "Porcelain.png",
+    "mat-rubber": "Rubber.png",
+    "mat-stainless-steel": "Stainless Steel.png",
+    "mat-velvet": "Velvet.png",
+    "mat-walnut-wood": "Walnut Wood.png",
+  };
+  const fileName = fileById[id];
+  if (!fileName) {
+    return "";
+  }
+  return `/assets/Materials/${encodeURIComponent(fileName)}`;
 }
 
 export function propThumbnail(id: string): string {
   if (id.startsWith("prop-")) {
-    return catalogPropUrl(id);
+    const localUrl = catalogPropUrl(id);
+    if (localUrl) {
+      return localUrl;
+    }
   }
   const resolved = PROP_THUMB_ALIASES[id] ?? id;
   return PROP_PHOTO_URLS[resolved] ?? PROP_THUMBNAILS[resolved] ?? PROP_THUMBNAILS[id] ?? fallbackThumb(id);
@@ -330,7 +385,10 @@ export function propPreviewUrls(id: string): string[] {
 
 export function materialThumbnail(id: string): string {
   if (id.startsWith("mat-")) {
-    return catalogMaterialUrl(id);
+    const localUrl = catalogMaterialUrl(id);
+    if (localUrl) {
+      return localUrl;
+    }
   }
   return MATERIAL_PHOTO_URLS[id] ?? MATERIAL_THUMBNAILS[id] ?? fallbackThumb(id);
 }

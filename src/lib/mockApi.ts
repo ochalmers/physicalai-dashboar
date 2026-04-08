@@ -28,6 +28,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     catalogEyebrow: "35 physics-ready models, 18 articulated assets, 35 joints",
     catalogDescription:
       "Configure, generate variations, and download SimReady USD scenes.",
+    catalogThumbnailUrl: "/assets/environments/kitchen.jpg",
   },
   {
     id: "env-living-soon",
@@ -38,6 +39,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     status: "soon",
     catalogDescription:
       "Residential layouts with furniture, lighting, and clutter for embodied navigation and manipulation.",
+    catalogThumbnailUrl: "/assets/environments/livingroom.png",
   },
   {
     id: "env-warehouse-soon",
@@ -48,6 +50,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     status: "soon",
     catalogDescription:
       "Industrial shelving, pallets, and forklifts for logistics and pick-and-place training.",
+    catalogThumbnailUrl: "/assets/environments/warehouse.png",
   },
   {
     id: "env-retail-soon",
@@ -58,6 +61,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     status: "soon",
     catalogDescription:
       "Aisles, checkout lanes, and stockrooms for retail navigation and customer scenarios.",
+    catalogThumbnailUrl: "/assets/environments/store.png",
   },
 ];
 

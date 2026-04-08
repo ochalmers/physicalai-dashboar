@@ -17,21 +17,21 @@ export function ApiAccessModal({ open, onClose }: ApiAccessModalProps) {
   return (
     <>
     <CenterModal open={open} title="API Access Required" onClose={onClose} size="xl">
-      <div className="space-y-[var(--s-400)]">
+      <div className="mx-auto max-w-[680px] space-y-[var(--s-300)]">
         <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">{ACCESS_COPY.apiModalIntro}</p>
-        <ul className="list-disc space-y-[var(--s-100)] pl-[var(--s-500)] text-[14px] text-[var(--text-default-heading)]">
+        <ul className="list-disc space-y-[6px] pl-[var(--s-400)] text-[14px] leading-[22px] text-[var(--text-default-heading)]">
           <li>Secrets for <span className="font-mono text-[13px]">Authorization: Bearer</span> on the cluster HTTP surface</li>
           <li>Key rotation and revocation through the control plane</li>
           <li>Tenant-scoped credentials bound to your workspace identity</li>
           <li>Audit metadata on write paths (configs, jobs, exports)</li>
         </ul>
-        <p className="text-[13px] text-[var(--text-default-body)]">
+        <p className="text-[13px] leading-[20px] text-[var(--text-default-body)]">
           Documentation and example payloads below remain readable without issuing keys.
         </p>
-        <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] flex flex-col items-stretch gap-[var(--s-300)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
+        <div className="mt-[var(--s-400)] flex flex-col items-stretch gap-[var(--s-200)] border-t border-[var(--border-default-secondary)] pt-[var(--s-300)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
           <Button
             variant="primary"
-            className="w-full sm:w-auto sm:min-w-[200px]"
+            className="w-full sm:w-auto sm:min-w-[180px]"
             type="button"
             onClick={() => {
               onClose();
@@ -42,7 +42,7 @@ export function ApiAccessModal({ open, onClose }: ApiAccessModalProps) {
           </Button>
           <Button
             variant="secondary"
-            className="w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] sm:w-auto sm:min-w-[200px]"
+            className="w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] sm:w-auto sm:min-w-[180px]"
             type="button"
             onClick={() => {
               onClose();
