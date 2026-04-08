@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchActivity, fetchSystemOverview } from "@/lib/mockApi";
+import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { Callout } from "@/components/system/Callout";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Card } from "@/components/ui/Card";
@@ -22,9 +24,9 @@ function daypartGreeting() {
 export function HomePage() {
   const { accessTier } = useAuth();
   const batchAccess = canUseFeature(accessTier, "batch_submit");
-  const apiKeysAllowed = canUseFeature(accessTier, "api_keys_write");
   const overview = useQuery({ queryKey: ["overview"], queryFn: fetchSystemOverview });
   const activity = useQuery({ queryKey: ["activity"], queryFn: fetchActivity });
+  const [talkOpen, setTalkOpen] = useState(false);
 
   const greeting = daypartGreeting();
   const paramCount = overview.data?.environments.parameterCount ?? 13;
@@ -80,8 +82,8 @@ export function HomePage() {
       ) : null}
 
       <section className="space-y-[var(--s-300)]">
-        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Environments</h2>
-        <div className="grid gap-[var(--s-300)] sm:grid-cols-2 xl:grid-cols-4">
+        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Scenes</h2>
+        <div className="grid gap-[var(--s-300)] sm:grid-cols-2 xl:grid-cols-5">
           {[
             { name: "Kitchen", href: "/environments/kitchen/batch", img: "/assets/environments/kitchen.jpg", live: true },
             {
@@ -104,6 +106,15 @@ export function HomePage() {
               </div>
             </Link>
           ))}
+          <button type="button" onClick={() => setTalkOpen(true)} className={`${teaserShell} text-left ${tx}`}>
+            <div className="flex h-[130px] w-full items-center justify-center bg-[var(--surface-page-secondary)]">
+              <span className="material-symbols-outlined text-[34px] text-[var(--text-primary-default)]">add_circle</span>
+            </div>
+            <div className="p-[var(--s-300)]">
+              <p className="text-[16px] font-semibold text-[var(--text-default-heading)]">Request New</p>
+              <p className="mt-[var(--s-100)] text-[12px] text-[var(--text-default-body)]">Ask the team to add a new scene.</p>
+            </div>
+          </button>
         </div>
       </section>
 
@@ -119,11 +130,10 @@ export function HomePage() {
               </span>
               <div className="min-w-0 flex-1">
                 <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">
-                  Kitchen Environment
+                  Recent Project
                 </h2>
-                <p className="mt-[var(--s-200)] text-[14px] leading-[20px] text-[var(--text-default-body)]">
-                  Configure, generate, and download physics-ready kitchen environments for robotic manipulation training.
-                </p>
+                <p className="mt-[var(--s-100)] text-[14px] font-medium text-[var(--text-default-heading)]">Kitchen</p>
+                <p className="mt-[var(--s-100)] text-[12px] text-[var(--text-default-body)]">Last modified: Today, 12:55 PM</p>
               </div>
             </div>
 
@@ -154,7 +164,7 @@ export function HomePage() {
                   <span className="material-symbols-outlined text-[20px]" aria-hidden>
                     tune
                   </span>
-                  Configure Environment
+                  Continue Configuring
                 </span>
                 <span className="material-symbols-outlined text-[20px]" aria-hidden>
                   arrow_forward
@@ -180,19 +190,17 @@ export function HomePage() {
                 </span>
               </Link>
               <Link
-                to="/environments/kitchen/api"
+                to="/environments/kitchen/downloads"
                 className={`flex w-full items-center justify-between rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] text-[15px] text-[var(--text-default-heading)] hover:bg-[var(--surface-default)] ${tx}`}
               >
                 <span className="inline-flex items-center gap-[var(--s-200)]">
                   <span className="material-symbols-outlined text-[20px] text-[var(--text-default-body)]" aria-hidden>
-                    code
+                    ios_share
                   </span>
-                  API Documentation
-                  {!apiKeysAllowed ? (
-                    <span className="material-symbols-outlined text-[16px] text-[var(--text-default-placeholder)]" aria-hidden>
-                      lock
-                    </span>
-                  ) : null}
+                  Export Scene
+                  <span className="material-symbols-outlined text-[16px] text-[var(--text-default-placeholder)]" aria-hidden>
+                    lock
+                  </span>
                 </span>
                 <span className="material-symbols-outlined text-[20px] text-[var(--text-default-placeholder)]" aria-hidden>
                   arrow_forward
@@ -207,15 +215,18 @@ export function HomePage() {
               {activity.isLoading ? (
                 <Skeleton className="h-16 w-full" />
               ) : downloadActivity.length === 0 ? (
-                <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">
-                  No downloads yet. Configure your first kitchen environment to get started.{" "}
+                <div className="space-y-[var(--s-200)]">
+                  <p className="text-[15px] font-medium text-[var(--text-default-heading)]">No activity yet</p>
+                  <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">
+                    Start by configuring a scene or generating your first environment.
+                  </p>
                   <Link
                     to="/environments/kitchen/batch"
-                    className="font-medium text-[var(--text-primary-default)] underline-offset-2 hover:underline"
+                    className={`inline-flex items-center text-[14px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-body)] ${tx}`}
                   >
-                    Configure kitchen
+                    Configure Kitchen
                   </Link>
-                </p>
+                </div>
               ) : (
                 <ul className="divide-y divide-[var(--border-default-secondary)]">
                   {downloadActivity.slice(0, 5).map((a) => (
@@ -277,93 +288,45 @@ export function HomePage() {
         <aside className="flex flex-col gap-[var(--s-400)] lg:sticky lg:top-[calc(3.5rem+var(--s-400)+env(safe-area-inset-top))]">
           <Card className="p-[var(--s-400)] sm:p-[var(--s-500)]">
             <div>
-              <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Assets summary</h2>
-              <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
-                Quick access to core libraries used in scene generation.
-              </p>
-
-              <div className="mt-[var(--s-300)] space-y-[var(--s-300)]">
-                <Link
-                  to="/assets/props"
-                  className={`group flex items-center justify-between gap-[var(--s-200)] border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] hover:bg-[var(--surface-default)] ${tx}`}
-                >
-                  <span className="flex min-w-0 items-center gap-[var(--s-200)]">
-                    <img
-                      src="/assets/Props/Dining Chair.png"
-                      alt=""
-                      className="h-12 w-12 shrink-0 rounded-br100 object-cover"
-                      aria-hidden
-                    />
-                    <span className="min-w-0">
-                      <span className="block text-[13px] font-medium text-[var(--text-default-heading)]">Props</span>
-                      <span className="text-[12px] text-[var(--text-default-body)]">
-                        {overview.data.assets.propsCount.toLocaleString()} items
-                      </span>
-                    </span>
-                  </span>
-                  <span className="material-symbols-outlined text-[18px] text-[var(--text-default-body)] transition-transform duration-250 group-hover:translate-x-0.5">
-                    arrow_forward
-                  </span>
-                </Link>
-
-                <Link
-                  to="/assets/materials"
-                  className={`group flex items-center justify-between gap-[var(--s-200)] border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] hover:bg-[var(--surface-default)] ${tx}`}
-                >
-                  <span className="flex min-w-0 items-center gap-[var(--s-200)]">
-                    <img
-                      src="/assets/Materials/Carrara Marble.png"
-                      alt=""
-                      className="h-12 w-12 shrink-0 rounded-br100 object-cover"
-                      aria-hidden
-                    />
-                    <span className="min-w-0">
-                      <span className="block text-[13px] font-medium text-[var(--text-default-heading)]">Materials</span>
-                      <span className="text-[12px] text-[var(--text-default-body)]">
-                        {overview.data.assets.materialsCount.toLocaleString()} items
-                      </span>
-                    </span>
-                  </span>
-                  <span className="material-symbols-outlined text-[18px] text-[var(--text-default-body)] transition-transform duration-250 group-hover:translate-x-0.5">
-                    arrow_forward
-                  </span>
-                </Link>
-
+              <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Library</h2>
+              <div className="mt-[var(--s-300)] grid gap-[var(--s-200)] text-[14px]">
+                <p className="flex items-center justify-between text-[var(--text-default-body)]">
+                  <span>Props</span>
+                  <span className="font-medium text-[var(--text-default-heading)]">{overview.data.assets.propsCount.toLocaleString()}</span>
+                </p>
+                <p className="flex items-center justify-between text-[var(--text-default-body)]">
+                  <span>Materials</span>
+                  <span className="font-medium text-[var(--text-default-heading)]">{overview.data.assets.materialsCount.toLocaleString()}</span>
+                </p>
               </div>
 
               <Link
                 to="/assets"
                 className={`mt-[var(--s-400)] inline-flex items-center text-[14px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-body)] ${tx}`}
               >
-                Open assets summary
+                Browse Library
               </Link>
             </div>
           </Card>
 
-          <Card className="p-[var(--s-400)] sm:p-[var(--s-500)]">
-            <div className="flex items-start gap-[var(--s-300)]">
-              <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-br100 border border-[#e8b8ff]/50 bg-[#f6edff] text-[#9333ea]"
-                aria-hidden
+          <Card className="border-[color-mix(in_srgb,var(--papaya-500)_35%,var(--border-default-secondary))] bg-[color-mix(in_srgb,var(--papaya-500)_8%,var(--surface-default))] p-[var(--s-400)] sm:p-[var(--s-500)]">
+            <div>
+              <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Need full access?</h2>
+              <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
+                Generate at scale, export environments, and integrate via API.
+              </p>
+              <button
+                type="button"
+                onClick={() => setTalkOpen(true)}
+                className={`mt-[var(--s-400)] inline-flex items-center text-[14px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-body)] ${tx}`}
               >
-                <span className="material-symbols-outlined text-[22px]">auto_awesome</span>
-              </span>
-              <div>
-                <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">SimReady</h2>
-                <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
-                  Convert any 3D model into a simulation-ready USD asset with physics and articulation.
-                </p>
-                <Link
-                  to="/simready"
-                  className={`mt-[var(--s-400)] inline-flex items-center text-[14px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-body)] ${tx}`}
-                >
-                  Learn more
-                </Link>
-              </div>
+                Talk to Team
+              </button>
             </div>
           </Card>
         </aside>
       </div>
+      <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
     </div>
   );
 }
