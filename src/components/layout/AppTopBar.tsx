@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
+import { ThemeSegmentedControl } from "@/components/system/ThemeSegmentedControl";
 import { usePresence } from "@/hooks/usePresence";
 import { tx, txOverlayPanel } from "./motion";
 
@@ -11,6 +13,7 @@ type AppTopBarProps = {
 
 export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
@@ -21,9 +24,9 @@ export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const qParam = params.get("q");
-    if (location.pathname === "/assets/props") {
-      setQuery(qParam ?? "");
+    const qParam = params.get("q") ?? "";
+    if (location.pathname.startsWith("/assets")) {
+      setQuery(qParam);
     } else {
       setQuery("");
     }
@@ -47,12 +50,22 @@ export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const q = query.trim();
-    if (q) {
-      navigate({ pathname: "/assets/props", search: `?q=${encodeURIComponent(q)}` });
-    } else {
-      navigate("/assets/props");
+    const qVal = query.trim();
+    const params = new URLSearchParams(location.search);
+    if (qVal) params.set("q", qVal);
+    else params.delete("q");
+    const search = params.toString() ? `?${params.toString()}` : "";
+
+    let pathname = "/assets/props";
+    if (location.pathname.startsWith("/assets/materials")) {
+      pathname = "/assets/materials";
+    } else if (location.pathname.startsWith("/assets/props")) {
+      pathname = "/assets/props";
+    } else if (location.pathname.startsWith("/assets")) {
+      pathname = "/assets/props";
     }
+
+    navigate({ pathname, search });
     setMenuOpen(false);
   };
 
@@ -63,14 +76,13 @@ export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
   };
 
   const displayName = user?.name ?? "Account";
-  const orgLabel = user?.orgLabel ?? "imagine.io";
   const avatarLetter = displayName.trim().charAt(0).toUpperCase() || "?";
 
   return (
     <header
       className={`fixed left-0 right-0 top-0 z-[35] border-b border-[var(--border-default-secondary)] bg-[var(--surface-default)]/92 pt-[env(safe-area-inset-top)] backdrop-blur-md supports-[backdrop-filter]:bg-[var(--surface-default)]/88 md:left-[272px] ${tx}`}
     >
-      <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-[var(--s-200)] px-[var(--s-300)] sm:gap-[var(--s-400)] sm:px-[var(--s-400)] md:px-[var(--s-500)]">
+      <div className="flex h-14 w-full items-center gap-[var(--s-200)] px-[var(--s-300)] sm:gap-[var(--s-300)] sm:px-[var(--s-400)] md:px-[var(--s-500)]">
         <button
           type="button"
           aria-label="Open navigation menu"
@@ -84,7 +96,7 @@ export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
 
         <form onSubmit={submitSearch} className="relative min-w-0 flex-1" role="search">
           <label htmlFor="app-global-search" className="sr-only">
-            Search props and assets
+            Search props and materials
           </label>
           <span className="pointer-events-none absolute left-[var(--s-300)] top-1/2 -translate-y-1/2 text-[var(--text-default-body)]">
             <span className={`material-symbols-outlined text-[20px] ${tx}`}>search</span>
@@ -106,25 +118,15 @@ export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             aria-controls={`${menuId}-menu`}
+            title={displayName}
             onClick={() => setMenuOpen((o) => !o)}
-            className={`flex items-center gap-[var(--s-200)] rounded-br200 py-[var(--s-200)] pl-[var(--s-200)] pr-[var(--s-300)] text-left hover:bg-[var(--surface-page-secondary)] active:scale-[0.98] ${tx}`}
+            className={`flex items-center rounded-br200 p-[var(--s-100)] text-left hover:bg-[var(--surface-page-secondary)] active:scale-[0.98] ${tx}`}
           >
             <span
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface-primary-default)] text-[15px] font-semibold text-[var(--text-on-color-body)] ring-2 ring-[var(--surface-default)]"
               aria-hidden
             >
               {avatarLetter}
-            </span>
-            <span className="hidden min-w-0 flex-col text-left sm:flex">
-              <span className="truncate text-[13px] font-medium leading-tight text-[var(--text-default-heading)]">
-                {displayName}
-              </span>
-              <span className="truncate text-[11px] leading-tight text-[var(--text-default-body)]">{orgLabel}</span>
-            </span>
-            <span
-              className={`material-symbols-outlined hidden text-[20px] text-[var(--text-default-body)] transition-transform duration-250 ease-out sm:inline ${menuOpen ? "rotate-180" : ""}`}
-            >
-              expand_more
             </span>
           </button>
 
@@ -133,17 +135,30 @@ export function AppTopBar({ onOpenNav, navOpen }: AppTopBarProps) {
               id={`${menuId}-menu`}
               role="menu"
               aria-labelledby={`${menuId}-trigger`}
-              className={`absolute right-0 top-[calc(100%+6px)] z-50 min-w-[220px] overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] py-[var(--s-100)] shadow-lg ${txOverlayPanel} ${
+              className={`absolute right-0 top-[calc(100%+6px)] z-50 min-w-[260px] overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] py-[var(--s-100)] shadow-lg ${txOverlayPanel} ${
                 menuShow ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0"
               }`}
             >
+              <div className="border-b border-[var(--border-default-secondary)] px-[var(--s-400)] pb-[var(--s-300)] pt-[var(--s-300)]">
+                <p className="truncate text-[13px] font-medium text-[var(--text-default-heading)]">{displayName}</p>
+                <p className="mt-[var(--s-100)] text-[11px] font-semibold uppercase tracking-wide text-[var(--text-default-body)]">
+                  Appearance
+                </p>
+                <ThemeSegmentedControl
+                  value={theme}
+                  onChange={setTheme}
+                  className="mt-[var(--s-200)] !max-w-none"
+                />
+              </div>
               <Link
                 role="menuitem"
                 to="/account"
                 className={`flex items-center gap-[var(--s-300)] px-[var(--s-400)] py-[var(--s-300)] text-[14px] text-[var(--text-default-heading)] hover:bg-[var(--surface-page-secondary)] ${tx}`}
                 onClick={() => setMenuOpen(false)}
               >
-                <span className="material-symbols-outlined text-[20px] text-[var(--text-default-body)]">manage_accounts</span>
+                <span className="material-symbols-outlined text-[20px] text-[var(--text-default-body)]">
+                  manage_accounts
+                </span>
                 Account
               </Link>
               <Link

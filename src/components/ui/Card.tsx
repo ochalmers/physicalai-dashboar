@@ -14,7 +14,7 @@ export function Card({
       className={`rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-300)] sm:p-[var(--s-400)] ${className}`}
     >
       {title ? (
-        <h2 className="mb-[var(--s-300)] text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
+        <h2 className="mb-[var(--s-300)] text-[14px] font-semibold leading-snug text-[var(--text-default-heading)]">
           {title}
         </h2>
       ) : null}

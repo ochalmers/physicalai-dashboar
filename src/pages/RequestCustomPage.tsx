@@ -1,57 +1,54 @@
-import { useState } from "react";
-import { Callout } from "@/components/system/Callout";
+import { useQuery } from "@tanstack/react-query";
+import { fetchEnvironments, ENVIRONMENT_CATALOG_PLACEHOLDERS } from "@/lib/mockApi";
+import { EnvironmentCatalogCards } from "@/components/environments/EnvironmentCatalogCards";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { RequestCustomSceneForm } from "@/components/environments/RequestCustomSceneForm";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useAuth } from "@/context/AuthContext";
 
 export function RequestCustomPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const { accessTier } = useAuth();
+  const envs = useQuery({ queryKey: ["environments"], queryFn: fetchEnvironments });
+  const catalog =
+    envs.data && envs.data.length > 0 ? envs.data : ENVIRONMENT_CATALOG_PLACEHOLDERS;
 
   return (
-    <div className="space-y-[var(--s-400)]">
-      <header>
-        <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-          Environment library
-        </p>
-        <h1 className="text-page-title mt-[var(--s-200)]">
-          Request custom environment
-        </h1>
-        <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">
-          Specify capture constraints, object classes, and downstream simulation targets. This creates an internal intake
-          ticket (mock).
-        </p>
-      </header>
+    <div className="space-y-[var(--s-500)]">
+      <PageHeader
+        title="Request a Custom Scene"
+        description="Tell us about your robot, simulation platform, and environment needs. We will follow up with scoping."
+      />
 
-      <Card title="Intake">
-        {submitted ? (
-          <Callout variant="success" title="Request received">
-            <p>
-              Your intake details were recorded for this demo session. In production, our team follows up with scoping and
-              access next steps.
-            </p>
-          </Callout>
+      <section className="space-y-[var(--s-300)]">
+        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">
+          Environment library
+        </h2>
+        <p className="sr-only">
+          Browse available and upcoming environments. Submit this form below for a custom scene.
+        </p>
+        {envs.isLoading ? (
+          <div className="grid gap-[var(--s-400)] sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="min-h-[360px] rounded-br200" />
+            ))}
+          </div>
         ) : (
-          <form
-            className="space-y-[var(--s-300)]"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSubmitted(true);
-            }}
-          >
-            <label className="flex flex-col gap-[var(--s-100)] text-[12px] uppercase text-[var(--text-default-body)]">
-              Constraints
-              <textarea
-                required
-                rows={5}
-                className="rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px]"
-                placeholder="Footprint, ceiling height, object inventory, articulation requirements…"
-              />
-            </label>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </form>
+          <EnvironmentCatalogCards
+            environments={catalog}
+            accessTier={accessTier}
+            showRequestCard={false}
+          />
         )}
-      </Card>
+      </section>
+
+      <section className="space-y-[var(--s-300)]">
+        <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Your request</h2>
+        <Card>
+          <RequestCustomSceneForm />
+        </Card>
+      </section>
     </div>
   );
 }
+

@@ -5,14 +5,16 @@ import { defaultKitchenValues, KITCHEN_PARAMETER_GROUPS } from "@/kitchen/params
 import type { KitchenParamKey } from "@/kitchen/params";
 import { fetchJobs, runBatchJob } from "@/lib/mockApi";
 import { BatchGenerationAccessModal } from "@/components/batch/BatchGenerationAccessModal";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PreviewModeBadge } from "@/components/kitchen/PreviewModeBadge";
 import { Callout } from "@/components/system/Callout";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
-import { ACCESS_COPY, canUseFeature } from "@/lib/access";
+import { ACCESS_COPY, canUseFeature, FULL_ACCESS_TOOLTIP } from "@/lib/access";
 
 const ALL_KEYS = Object.keys(defaultKitchenValues()) as KitchenParamKey[];
 
@@ -30,6 +32,17 @@ function combinationCount(sel: Record<KitchenParamKey, string[]>) {
   for (const k of ALL_KEYS) {
     const arr = sel[k] ?? [];
     n *= Math.max(1, arr.length);
+  }
+  return n;
+}
+
+function groupCombinationCount(
+  groupParams: Record<string, readonly string[]>,
+  selections: Record<KitchenParamKey, string[]>,
+): number {
+  let n = 1;
+  for (const key of Object.keys(groupParams) as KitchenParamKey[]) {
+    n *= Math.max(1, selections[key]?.length ?? 1);
   }
   return n;
 }
@@ -53,7 +66,8 @@ export function BatchGenerationPage() {
   const jobs = useQuery({
     queryKey: ["jobs"],
     queryFn: fetchJobs,
-    refetchInterval: 4000,
+    refetchInterval: batchAllowed ? 4000 : false,
+    enabled: batchAllowed,
   });
 
   const rawCount = useMemo(() => combinationCount(selections), [selections]);
@@ -83,33 +97,43 @@ export function BatchGenerationPage() {
 
   return (
     <div className="space-y-[var(--s-400)]">
-      <header>
-        <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-          Generation
-        </p>
-        <div className="mt-[var(--s-200)] flex flex-wrap items-center gap-[var(--s-300)]">
-          <h1 className="text-page-title">Batch generation</h1>
-          {!batchAllowed ? (
-            <PreviewModeBadge
-              label="Workflow preview"
-              title="Inspect parameters, combinations, and validation. Running batch jobs requires Full access."
-            />
-          ) : null}
-        </div>
-        <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">
-          Controlled combinatorial expansion. Invalid regions are blocked before queueing.
-        </p>
-      </header>
+      <PageHeader
+        title="Batch variations"
+        titleAfter={
+          !batchAllowed ? (
+            <PreviewModeBadge label="Explore" title={FULL_ACCESS_TOOLTIP} />
+          ) : null
+        }
+        description="Select environment and parameter ranges, validate rules, then queue variation jobs."
+      />
+
+      <div
+        className="flex flex-wrap gap-x-[var(--s-500)] gap-y-[var(--s-200)] rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-400)] py-[var(--s-300)] text-[13px] text-[var(--text-default-body)]"
+        aria-label="Workflow steps"
+      >
+        <span>
+          <strong className="text-[var(--text-default-heading)]">1.</strong> Environment — Kitchen
+        </span>
+        <span>
+          <strong className="text-[var(--text-default-heading)]">2.</strong> Parameter ranges
+        </span>
+        <span>
+          <strong className="text-[var(--text-default-heading)]">3.</strong> Review combinations
+        </span>
+        <span>
+          <strong className="text-[var(--text-default-heading)]">4.</strong> Queue job
+          {!batchAllowed ? " (Full access)" : ""}
+        </span>
+      </div>
 
       {!batchAllowed ? (
-        <Callout variant="info" title="Explore the workflow">
-          <p>{ACCESS_COPY.batchGated}</p>
-          <p className="mt-[var(--s-300)] text-[13px]">
-            Use <strong>Run batch job</strong> to see what&apos;s required — or{" "}
+        <Callout variant="info" title="Explore">
+          <p className="text-[14px]">{ACCESS_COPY.batchGated}</p>
+          <p className="mt-[var(--s-200)] text-[13px]">
             <Link to="/account" className="font-medium text-[var(--text-primary-default)] underline underline-offset-2">
-              switch to Full
+              Enable Full
             </Link>{" "}
-            under Account for the mock queue on this device.
+            under Account to queue jobs on this device.
           </p>
         </Callout>
       ) : null}
@@ -117,41 +141,50 @@ export function BatchGenerationPage() {
       <div className="grid gap-[var(--s-400)] lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-[var(--s-300)]">
           {(Object.entries(KITCHEN_PARAMETER_GROUPS) as [string, Record<string, readonly string[]>][]).map(
-            ([group, params]) => (
-              <Card key={group} title={group}>
-                <div className="space-y-[var(--s-400)]">
-                  {Object.entries(params).map(([param, opts]) => {
-                    const key = param as KitchenParamKey;
-                    return (
-                      <div key={param}>
-                        <p className="mb-[var(--s-200)] text-[12px] uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-                          {param}
-                        </p>
-                        <div className="flex flex-wrap gap-[var(--s-200)]">
-                          {opts.map((opt) => {
-                            const active = selections[key]?.includes(opt);
-                            return (
-                              <button
-                                key={opt}
-                                type="button"
-                                onClick={() => toggleValue(key, opt)}
-                                className={`rounded-br100 border px-[var(--s-300)] py-[var(--s-100)] text-[12px] transition-[color,background-color,border-color] duration-250 ease-out ${
-                                  active
-                                    ? "border-[var(--border-primary-default)] bg-[var(--surface-primary-default-subtle)] text-[var(--text-default-heading)]"
-                                    : "border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-[var(--text-default-body)]"
-                                }`}
-                              >
-                                {opt}
-                              </button>
-                            );
-                          })}
+            ([group, params]) => {
+              const groupN = groupCombinationCount(params, selections);
+              return (
+                <Card key={group} title={group}>
+                  <p className="mb-[var(--s-300)] text-[12px] text-[var(--text-default-body)]">
+                    Combinations from this group:{" "}
+                    <span className="font-mono font-medium text-[var(--text-default-heading)]">
+                      {groupN.toLocaleString()}
+                    </span>
+                  </p>
+                  <div className="space-y-[var(--s-400)]">
+                    {Object.entries(params).map(([param, opts]) => {
+                      const key = param as KitchenParamKey;
+                      return (
+                        <div key={param}>
+                          <p className="mb-[var(--s-200)] text-[13px] font-medium text-[var(--text-default-body)]">
+                            {param}
+                          </p>
+                          <div className="flex flex-wrap gap-[var(--s-200)]">
+                            {opts.map((opt) => {
+                              const active = selections[key]?.includes(opt);
+                              return (
+                                <button
+                                  key={opt}
+                                  type="button"
+                                  onClick={() => toggleValue(key, opt)}
+                                  className={`rounded-br100 border px-[var(--s-300)] py-[var(--s-100)] text-[12px] transition-[color,background-color,border-color] duration-250 ease-out ${
+                                    active
+                                      ? "border-[var(--border-primary-default)] bg-[var(--surface-primary-default-subtle)] text-[var(--text-default-heading)]"
+                                      : "border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-[var(--text-default-body)]"
+                                  }`}
+                                >
+                                  {opt}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ),
+                      );
+                    })}
+                  </div>
+                </Card>
+              );
+            },
           )}
         </div>
 
@@ -159,8 +192,8 @@ export function BatchGenerationPage() {
           <Card title="Combinatorics">
             <dl className="space-y-[var(--s-200)] text-[13px]">
               <div className="flex justify-between gap-[var(--s-400)]">
-                <dt className="text-[var(--text-default-body)]">Raw combinations</dt>
-                <dd className="font-mono">{rawCount.toLocaleString()}</dd>
+                <dt className="text-[var(--text-default-body)]">Total combinations</dt>
+                <dd className="font-mono text-[var(--text-default-heading)]">{rawCount.toLocaleString()}</dd>
               </div>
               <div className="flex justify-between gap-[var(--s-400)]">
                 <dt className="text-[var(--text-default-body)]">Validation</dt>
@@ -181,6 +214,7 @@ export function BatchGenerationPage() {
               className="mt-[var(--s-400)] inline-flex w-full items-center justify-center gap-[var(--s-200)]"
               disabled={mutation.isPending || Boolean(brokenRules.length)}
               aria-haspopup={!batchAllowed ? "dialog" : undefined}
+              title={!batchAllowed ? "Locked (Full access required)" : undefined}
               onClick={() => {
                 if (!batchAllowed) {
                   setAccessModalOpen(true);
@@ -195,12 +229,10 @@ export function BatchGenerationPage() {
                   lock
                 </span>
               ) : null}
-              {mutation.isPending ? "Queueing…" : "Run batch job"}
+              {mutation.isPending ? "Queueing…" : "Queue job"}
             </Button>
             {!batchAllowed ? (
-              <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">
-                Validation still applies. Choose <strong>Run batch job</strong> to review access requirements.
-              </p>
+              <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">Locked (Full access required)</p>
             ) : null}
             {mutation.isError ? (
               <p className="mt-[var(--s-300)] text-[13px] text-[var(--text-error-default)]" role="alert">
@@ -223,7 +255,14 @@ export function BatchGenerationPage() {
           </Card>
 
           <Card title="Job queue">
-            {jobs.isError ? (
+            {!batchAllowed ? (
+              <div className="flex flex-col items-center gap-[var(--s-300)] rounded-br100 border border-dashed border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-400)] py-[var(--s-500)] text-center">
+                <Badge variant="locked">Locked</Badge>
+                <p className="max-w-[40ch] text-[13px] leading-[20px] text-[var(--text-default-body)]">
+                  Queue visibility and outputs require Full access.
+                </p>
+              </div>
+            ) : jobs.isError ? (
               <ErrorPanel message="Could not load the job queue." onRetry={() => jobs.refetch()} />
             ) : jobs.isLoading ? (
               <div className="space-y-[var(--s-300)]" aria-busy="true" aria-live="polite">
@@ -241,17 +280,11 @@ export function BatchGenerationPage() {
                 </span>
                 <p className="text-[14px] font-medium text-[var(--text-default-heading)]">No jobs yet</p>
                 <p className="mt-[var(--s-200)] text-[13px] leading-[20px] text-[var(--text-default-body)]">
-                  Queued batch runs appear here with status and progress.
+                  Queued runs appear here with status and progress.
                 </p>
-                {!batchAllowed ? (
-                  <p className="mt-[var(--s-300)] text-[12px] text-[var(--text-default-body)]">
-                    Full access is required to enqueue jobs on this demo.
-                  </p>
-                ) : (
-                  <p className="mt-[var(--s-300)] text-[12px] text-[var(--text-default-body)]">
-                    Run a job from the combinatorics card when validation passes.
-                  </p>
-                )}
+                <p className="mt-[var(--s-300)] text-[12px] text-[var(--text-default-body)]">
+                  Run a job from the combinatorics card when validation passes.
+                </p>
               </div>
             ) : (
               <ul className="space-y-[var(--s-200)] text-[13px]">
@@ -259,7 +292,7 @@ export function BatchGenerationPage() {
                   <li key={j.id} className="border-b border-[var(--border-default-secondary)] pb-[var(--s-200)] last:border-0">
                     <div className="flex justify-between gap-[var(--s-200)]">
                       <span className="font-mono text-[12px]">{j.id}</span>
-                      <span className="uppercase">{j.status}</span>
+                      <span className="capitalize">{j.status}</span>
                     </div>
                     <div className="mt-[var(--s-100)] h-1 w-full overflow-hidden rounded-full bg-[var(--grey-100)]">
                       <div

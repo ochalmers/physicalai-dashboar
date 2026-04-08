@@ -40,12 +40,16 @@ export interface MaterialRecord {
   id: string;
   name: string;
   type: string;
+  /** Shelf label, e.g. Wood / Metal (capitalized in UI when absent) */
+  categoryLabel?: string;
   staticFriction: number;
   dynamicFriction: number;
   restitution: number;
   densityKgM3: number;
   /** Optional preview for library cards */
   thumbnailUrl?: string;
+  /** When set, card + detail show this instead of the friction line */
+  physicsLineOverride?: string;
 }
 
 export interface EnvironmentEntity {
@@ -55,6 +59,12 @@ export interface EnvironmentEntity {
   totalCombinations: number;
   lastGeneratedAt: string;
   status: "active" | "maintenance" | "soon";
+  /** Library overview card — hero icon (Material Symbols name) */
+  catalogIcon?: string;
+  /** Short stats line under the title (active environments) */
+  catalogEyebrow?: string;
+  /** Body copy on the library card */
+  catalogDescription?: string;
 }
 
 export interface SystemOverview {
@@ -133,7 +143,10 @@ export interface BatchJobResult {
 export interface ApiKeyRecord {
   id: string;
   label: string;
-  prefix: string;
+  /** Obfuscated key for display, e.g. imag_sk_live_7f3a…b2e1 */
+  maskedKey: string;
   createdAt: string;
   lastUsedAt: string | null;
+  requestsThisMonth: number;
+  environment: "live" | "test";
 }

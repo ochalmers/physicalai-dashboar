@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchAssets, fetchPropById } from "@/lib/mockApi";
+import { AssetLibraryTabs } from "@/components/assets/AssetLibraryTabs";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ExportAccessModal } from "@/components/access/ExportAccessModal";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Card } from "@/components/ui/Card";
@@ -10,7 +12,7 @@ import { CenterModal } from "@/components/ui/CenterModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { canUseFeature } from "@/lib/access";
-import type { PropAsset, PropTagKind } from "@/types";
+import type { PropAsset, PropTagKind, SimReadyTier } from "@/types";
 
 const txInteract =
   "transition-[color,background-color,border-color,box-shadow,transform] duration-250 ease-out";
@@ -34,27 +36,83 @@ function tagLabel(kind: PropTagKind) {
   }
 }
 
+const PROP_SHELF_CATEGORY: Record<string, string> = {
+  tableware: "Kitchenware",
+  cabinetry: "Furniture",
+  appliance: "Appliance",
+  decor: "Decor",
+  lighting: "Lighting",
+  furniture: "Furniture",
+  seating: "Seating",
+};
+
+function shelfCategory(slug: string) {
+  return PROP_SHELF_CATEGORY[slug] ?? slug.charAt(0).toUpperCase() + slug.slice(1);
+}
+
+function tagHeroClass(kind: PropTagKind) {
+  if (kind === "manipulation") return "bg-[#fff1f2]";
+  if (kind === "articulated") return "bg-[#fffbeb]";
+  return "bg-[#eff6ff]";
+}
+
+function tagPillClass(kind: PropTagKind) {
+  if (kind === "manipulation") return "border border-[#fed7aa] bg-[#fff7ed] text-[#c2410c]";
+  if (kind === "articulated") return "border border-[#fde68a] bg-[#fffbeb] text-[#b45309]";
+  return "border border-[#bfdbfe] bg-[#eff6ff] text-[#1d4ed8]";
+}
+
+function simReadyLabel(t: SimReadyTier) {
+  if (t === "certified") return "Certified";
+  if (t === "pending") return "Pending";
+  return "Unsupported";
+}
+
+function useAssetSearchParams() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get("q") ?? "";
+  const category = searchParams.get("category") ?? "all";
+  const simReady = searchParams.get("simReady") ?? "all";
+  const articulation = searchParams.get("articulation") ?? "all";
+
+  const setParam = (key: string, value: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (!value || value === "all") next.delete(key);
+        else next.set(key, value);
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  return { q, category, simReady, articulation, setParam, searchParams };
+}
+
 export function PropsPage() {
   const { accessTier } = useAuth();
   const fullExport = canUseFeature(accessTier, "full_export");
   const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [searchParams] = useSearchParams();
-  const [q, setQ] = useState(() => searchParams.get("q") ?? "");
-
-  useEffect(() => {
-    setQ(searchParams.get("q") ?? "");
-  }, [searchParams]);
-  const [category, setCategory] = useState("all");
-  const [simReady, setSimReady] = useState("all");
-  const [articulation, setArticulation] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(true);
+  const { q, category, simReady, articulation, setParam } = useAssetSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const query = useMemo(
-    () => ({ q: q || undefined, category, simReady, articulation }),
+    () => ({
+      q: q.trim() || undefined,
+      category,
+      simReady,
+      articulation,
+    }),
     [q, category, simReady, articulation],
   );
 
-  const list = useQuery({ queryKey: ["assets", query], queryFn: () => fetchAssets(query) });
+  const list = useQuery({
+    queryKey: ["assets", q.trim(), category, simReady, articulation] as const,
+    queryFn: () => fetchAssets(query),
+  });
+
   const detail = useQuery({
     queryKey: ["asset", selectedId],
     queryFn: () => fetchPropById(selectedId!),
@@ -65,90 +123,83 @@ export function PropsPage() {
 
   return (
     <div className="space-y-[var(--s-400)]">
-      <header className="flex flex-col gap-[var(--s-300)] sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-            Asset library
-          </p>
-          <h1 className="text-page-title mt-[var(--s-200)]">Props</h1>
-          <p className="mt-[var(--s-200)] max-w-[720px] text-[14px] text-[var(--text-default-body)]">
-            Kitchen-native props — cabinetry, island, brass hardware, prep tools — with collision proxies and material
-            bindings.
-          </p>
-        </div>
-        <button
-          type="button"
-          className={`inline-flex items-center gap-[var(--s-200)] self-start rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-default-heading)] hover:bg-[var(--surface-page-secondary)] ${txInteract}`}
-        >
-          <span className="material-symbols-outlined text-[20px] text-[var(--text-default-body)]">tune</span>
-          Filters
-        </button>
-      </header>
+      <AssetLibraryTabs />
 
-      <Card>
-        <div className="flex flex-col gap-[var(--s-300)] md:flex-row md:items-end">
-          <label className="flex flex-1 flex-col gap-[var(--s-100)] text-[12px] uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-            Search
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
-              placeholder="id, name, category"
-            />
-          </label>
-          <label className="flex flex-col gap-[var(--s-100)] text-[12px] uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-            Category
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
-            >
-              <option value="all">All</option>
-              <option value="tableware">tableware</option>
-              <option value="cabinetry">cabinetry</option>
-              <option value="appliance">appliance</option>
-              <option value="decor">decor</option>
-              <option value="lighting">lighting</option>
-              <option value="furniture">furniture</option>
-              <option value="seating">seating</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-[var(--s-100)] text-[12px] uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-            SimReady
-            <select
-              value={simReady}
-              onChange={(e) => setSimReady(e.target.value)}
-              className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
-            >
-              <option value="all">All</option>
-              <option value="certified">certified</option>
-              <option value="pending">pending</option>
-              <option value="unsupported">unsupported</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-[var(--s-100)] text-[12px] uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-            Articulation
-            <select
-              value={articulation}
-              onChange={(e) => setArticulation(e.target.value)}
-              className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
-            >
-              <option value="all">All</option>
-              <option value="fixed">fixed</option>
-              <option value="revolute">revolute</option>
-              <option value="prismatic">prismatic</option>
-              <option value="compound">compound</option>
-            </select>
-          </label>
+      <PageHeader
+        title="Props"
+        description="Kitchen-native props — cabinetry, island, brass hardware, prep tools — with collision proxies and material bindings."
+        actions={
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((o) => !o)}
+            className={`inline-flex shrink-0 items-center gap-[var(--s-200)] rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-default-heading)] hover:bg-[var(--surface-page-secondary)] ${txInteract}`}
+          >
+            <span className="material-symbols-outlined text-[20px] text-[var(--text-default-body)]">tune</span>
+            {filtersOpen ? "Hide filters" : "Filters"}
+          </button>
+        }
+      />
+
+      {filtersOpen ? (
+        <div id="asset-filters">
+          <Card>
+            <div className="flex flex-col gap-[var(--s-300)] md:flex-row md:flex-wrap md:items-end">
+            <label className="flex min-w-[140px] flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+              Category
+              <select
+                value={category}
+                onChange={(e) => setParam("category", e.target.value)}
+                className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
+              >
+                <option value="all">All</option>
+                <option value="tableware">tableware</option>
+                <option value="cabinetry">cabinetry</option>
+                <option value="appliance">appliance</option>
+                <option value="decor">decor</option>
+                <option value="lighting">lighting</option>
+                <option value="furniture">furniture</option>
+                <option value="seating">seating</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+              SimReady
+              <select
+                value={simReady}
+                onChange={(e) => setParam("simReady", e.target.value)}
+                className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
+              >
+                <option value="all">All</option>
+                <option value="certified">certified</option>
+                <option value="pending">pending</option>
+                <option value="unsupported">unsupported</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+              Articulation
+              <select
+                value={articulation}
+                onChange={(e) => setParam("articulation", e.target.value)}
+                className={`rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] ${txInteract}`}
+              >
+                <option value="all">All</option>
+                <option value="fixed">fixed</option>
+                <option value="revolute">revolute</option>
+                <option value="prismatic">prismatic</option>
+                <option value="compound">compound</option>
+              </select>
+            </label>
+          </div>
+          </Card>
         </div>
-      </Card>
+      ) : null}
 
       {list.isError ? (
         <ErrorPanel message="Props couldn’t be loaded." onRetry={() => list.refetch()} />
       ) : list.isLoading ? (
-        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="h-52" />
+        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-56" />
           ))}
         </div>
       ) : list.data?.length === 0 ? (
@@ -156,7 +207,7 @@ export function PropsPage() {
           <p className="text-[14px] text-[var(--text-default-body)]">No props match filters.</p>
         </Card>
       ) : (
-        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {list.data?.map((p) => (
             <PropCard key={p.id} asset={p} onOpen={() => setSelectedId(p.id)} />
           ))}
@@ -167,7 +218,8 @@ export function PropsPage() {
         open={Boolean(selectedId)}
         title={selected?.name ?? "Prop"}
         onClose={() => setSelectedId(null)}
-        size="lg"
+        size="xl"
+        contentAlign="start"
       >
         {detail.isLoading ? (
           <Skeleton className="h-40 w-full" />
@@ -188,35 +240,34 @@ export function PropsPage() {
 }
 
 function PropCard({ asset, onOpen }: { asset: PropAsset; onOpen: () => void }) {
-  const sub = `${asset.massKg} kg, ${asset.materialType}`;
   return (
     <button
       type="button"
       onClick={onOpen}
-      className={`flex flex-col rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left hover:shadow-md active:scale-[0.99] ${txInteract}`}
+      className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm hover:shadow-md active:scale-[0.99] ${txInteract}`}
     >
-      <div className="flex items-center gap-[var(--s-100)] px-[var(--s-300)] pt-[var(--s-300)] text-[11px] font-semibold uppercase tracking-wide">
-        <span className={`inline-flex items-center gap-0.5 ${tagClasses(asset.tag)}`}>
-          {asset.tag === "articulated" ? (
-            <span className="material-symbols-outlined text-[14px]" aria-hidden>
-              all_inclusive
-            </span>
-          ) : null}
+      <div className={`relative aspect-[4/3] w-full overflow-hidden ${tagHeroClass(asset.tag)}`}>
+        <span
+          className={`absolute left-[var(--s-300)] top-[var(--s-300)] z-[1] rounded-br100 px-[var(--s-200)] py-[3px] text-[10px] font-bold leading-tight tracking-wide ${tagPillClass(asset.tag)}`}
+        >
           {tagLabel(asset.tag)}
         </span>
-      </div>
-      <div className="px-[var(--s-300)] pb-[var(--s-200)] pt-[var(--s-200)]">
         <img
           src={asset.thumbnailUrl}
           alt=""
-          className="h-[100px] w-full rounded-br100 object-cover opacity-95"
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover object-center"
         />
       </div>
-      <div className="space-y-[var(--s-100)] px-[var(--s-300)] pb-[var(--s-300)]">
-        <span className="text-[14px] font-semibold leading-[18px] text-[var(--text-default-heading)]">
+      <div className="space-y-[var(--s-200)] px-[var(--s-300)] pb-[var(--s-400)] pt-[var(--s-400)]">
+        <span className="block text-[16px] font-semibold leading-snug text-[var(--text-default-heading)]">
           {asset.name}
         </span>
-        <p className="text-[12px] leading-[16px] text-[var(--text-default-body)]">{sub}</p>
+        <p className="text-[13px] leading-[18px] text-[var(--text-default-body)]">{shelfCategory(asset.category)}</p>
+        <p className="text-[13px] text-[var(--text-default-body)]">{asset.massKg} kg</p>
+        <p className="text-[13px] text-[var(--text-default-body)]">{asset.materialType}</p>
+        <p className="text-[12px] text-[var(--text-default-placeholder)]">SimReady: {simReadyLabel(asset.simReady)}</p>
       </div>
     </button>
   );
@@ -242,14 +293,20 @@ function PropDetail({
   const dims = `${asset.dimensionsMm.w} × ${asset.dimensionsMm.h} × ${asset.dimensionsMm.d} mm`;
   return (
     <div className="space-y-[var(--s-500)]">
-      <p className={`text-[11px] font-semibold uppercase tracking-wide ${tagClasses(asset.tag)}`}>
-        {tagLabel(asset.tag)}
-      </p>
+      <div className="-mx-[var(--s-500)] mb-[var(--s-400)] overflow-hidden bg-[var(--surface-page-secondary)]">
+        <div className="flex max-h-[min(52vh,520px)] min-h-[220px] items-center justify-center">
+          <img
+            src={asset.thumbnailUrl}
+            alt=""
+            className="h-full w-full max-h-[min(52vh,520px)] object-contain object-center"
+          />
+        </div>
+      </div>
+
+      <p className={`text-[13px] font-semibold ${tagClasses(asset.tag)}`}>{tagLabel(asset.tag)}</p>
 
       <div>
-        <h3 className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-          Dimensions
-        </h3>
+        <h3 className="text-[14px] font-semibold text-[var(--text-default-heading)]">Dimensions</h3>
         <p className="mt-[var(--s-200)] text-[13px] text-[var(--text-default-body)]">
           <span className="text-[var(--text-default-body)]">W × H × D</span>
           <span className="mx-[var(--s-200)] text-[var(--border-default-secondary)]">·</span>
@@ -258,9 +315,7 @@ function PropDetail({
       </div>
 
       <div>
-        <h3 className="text-[12px] font-medium uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
-          Physics properties
-        </h3>
+        <h3 className="text-[14px] font-semibold text-[var(--text-default-heading)]">Physics properties</h3>
         <table className="mt-[var(--s-200)] w-full border-collapse text-[13px]">
           <tbody>
             {(
@@ -290,7 +345,7 @@ function PropDetail({
           aria-haspopup={!exportAllowed ? "dialog" : undefined}
           onClick={() =>
             run(() => {
-              alert("Download queued: SimReady USD — mock");
+              alert("Download queued: SimReady USD");
             })
           }
         >
@@ -307,7 +362,7 @@ function PropDetail({
           aria-haspopup={!exportAllowed ? "dialog" : undefined}
           onClick={() =>
             run(() => {
-              alert("Download queued: GLB — mock");
+              alert("Download queued: GLB");
             })
           }
         >
@@ -324,7 +379,7 @@ function PropDetail({
           aria-haspopup={!exportAllowed ? "dialog" : undefined}
           onClick={() =>
             run(() => {
-              alert("Metadata JSON — mock");
+              alert("Metadata JSON — download queued");
             })
           }
         >

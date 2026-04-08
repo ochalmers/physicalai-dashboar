@@ -95,3 +95,33 @@
   --br-200: 8px;
   --bw-25: 1px;
 }
+
+/**
+ * Dark theme — editorial contrast, soft neutrals (see `.cursor/skills/inspo-design` + `inspo/` references).
+ */
+.dark {
+  color-scheme: dark;
+
+  --text-default-heading: #f2f2f2;
+  --text-default-body: #a8a8a8;
+  --text-default-placeholder: #737373;
+  --text-primary-default: #ff7a3d;
+  --text-success-default: #34d399;
+  --text-error-default: #fb7185;
+  --text-on-color-body: #0c0c0c;
+
+  --surface-default: #141414;
+  --surface-page: #0c0c0c;
+  --surface-page-secondary: #1a1a1a;
+  --surface-primary-default: #ec4e0b;
+  --surface-primary-default-hover: #ff6a1a;
+  --surface-primary-default-subtle: rgba(236, 78, 11, 0.18);
+  --surface-success-default-subtle: rgba(52, 211, 153, 0.12);
+  --surface-error-default-subtle: rgba(251, 113, 133, 0.12);
+
+  --border-default-secondary: #2a2a2a;
+  --border-primary-default: #ec4e0b;
+
+  --grey-50: #1a1a1a;
+  --grey-100: #2a2a2a;
+}

@@ -5,9 +5,8 @@ import { Callout } from "@/components/system/Callout";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { PreviewModeBadge } from "@/components/kitchen/PreviewModeBadge";
 import { useAuth } from "@/context/AuthContext";
-import { ACCESS_COPY, canUseFeature } from "@/lib/access";
+import { canUseFeature } from "@/lib/access";
 
 const tx = "transition-[color,background-color,box-shadow,transform] duration-250 ease-out";
 
@@ -18,7 +17,6 @@ function firstName(name: string | undefined) {
 
 export function HomePage() {
   const { user, accessTier } = useAuth();
-  const fullExportAccess = canUseFeature(accessTier, "full_export");
   const batchAccess = canUseFeature(accessTier, "batch_submit");
   const apiKeysAllowed = canUseFeature(accessTier, "api_keys_write");
   const overview = useQuery({ queryKey: ["overview"], queryFn: fetchSystemOverview });
@@ -64,16 +62,6 @@ export function HomePage() {
         </h1>
       </header>
 
-      {accessTier !== "full" ? (
-        <Callout variant="info" title="Product window">
-          <p>{ACCESS_COPY.exploreBanner}</p>
-          <p className="mt-[var(--s-200)] text-[13px]">
-            Choose <strong>Full</strong> under Account for mock API credentials, batch jobs, and export pipelines on this
-            device.
-          </p>
-        </Callout>
-      ) : null}
-
       {activity.isError ? (
         <Callout variant="warning" title="Activity feed unavailable">
           Recent downloads couldn’t be loaded.{" "}
@@ -98,12 +86,11 @@ export function HomePage() {
                 <span className="material-symbols-outlined text-[24px]">layers</span>
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-[var(--s-300)]">
-                  <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">Kitchen Environment</h2>
-                  {!fullExportAccess ? <PreviewModeBadge /> : null}
-                </div>
+                <h2 className="text-[18px] font-semibold text-[var(--text-default-heading)]">
+                  Kitchen Environment
+                </h2>
                 <p className="mt-[var(--s-200)] text-[14px] leading-[20px] text-[var(--text-default-body)]">
-                  Configure, generate, and download physics-ready kitchen environments for robotic manipulation training.
+                  Parameterized kitchen scenes for manipulation and sim validation.
                 </p>
               </div>
             </div>
@@ -111,9 +98,9 @@ export function HomePage() {
             <div className="mt-[var(--s-500)] flex flex-wrap gap-x-[var(--s-600)] gap-y-[var(--s-400)] border-t border-[var(--border-default-secondary)] pt-[var(--s-500)]">
               {(
                 [
-                  { value: "35", label: "Layout presets" },
-                  { value: "18", label: "Appliances" },
-                  { value: "24+", label: "Style variants" },
+                  { value: "35", label: "Models" },
+                  { value: "18", label: "Articulated" },
+                  { value: "24+", label: "Joints" },
                   { value: String(paramCount), label: "Parameters" },
                 ] as const
               ).map((s) => (
@@ -128,9 +115,9 @@ export function HomePage() {
 
             <Link
               to="/environments/kitchen/configure"
-              className={`mt-[var(--s-500)] flex w-full items-center justify-center gap-[var(--s-200)] rounded-br100 bg-[var(--surface-primary-default)] px-[var(--s-400)] py-[var(--s-300)] text-[15px] font-medium text-[var(--text-on-color-body)] hover:bg-[var(--surface-primary-default-hover)] active:scale-[0.99] ${tx}`}
+              className={`mt-[var(--s-500)] flex w-full items-center justify-center gap-[var(--s-200)] rounded-none bg-[var(--surface-primary-default)] px-[var(--s-400)] py-[var(--s-300)] text-[15px] font-medium text-[var(--text-on-color-body)] hover:bg-[var(--surface-primary-default-hover)] active:scale-[0.99] ${tx}`}
             >
-              Configure environment
+              Configure
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
                 arrow_forward
               </span>
@@ -146,7 +133,11 @@ export function HomePage() {
                 </span>
                 Batch variations
                 {!batchAccess ? (
-                  <span className="material-symbols-outlined text-[16px] text-[var(--text-default-placeholder)]" title="Running jobs requires Full access" aria-hidden>
+                  <span
+                    className="material-symbols-outlined text-[16px] text-[var(--text-default-placeholder)]"
+                    title="Locked (Full access required)"
+                    aria-hidden
+                  >
                     lock
                   </span>
                 ) : null}
@@ -158,11 +149,11 @@ export function HomePage() {
                 <span className="material-symbols-outlined text-[18px] text-[var(--text-default-placeholder)]">
                   code
                 </span>
-                API documentation
+                API keys
                 {!apiKeysAllowed ? (
                   <span
                     className="material-symbols-outlined text-[16px] text-[var(--text-default-placeholder)]"
-                    title="Issuing keys requires Full access"
+                    title="Locked (Full access required)"
                     aria-hidden
                   >
                     lock
@@ -184,7 +175,7 @@ export function HomePage() {
                     to="/environments/kitchen/configure"
                     className="font-medium text-[var(--text-primary-default)] underline-offset-2 hover:underline"
                   >
-                    Go to Kitchen Environment
+                    Configure kitchen
                   </Link>
                 </p>
               ) : (
@@ -201,6 +192,48 @@ export function HomePage() {
               )}
             </div>
           </section>
+
+          <footer className="border-t border-[var(--border-default-secondary)] pt-[var(--s-500)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[var(--text-caption-ls)] text-[var(--text-default-body)]">
+              Quick links
+            </p>
+            <ul className="mt-[var(--s-300)] flex flex-wrap gap-x-[var(--s-500)] gap-y-[var(--s-200)] text-[13px] font-medium">
+              <li>
+                <Link to="/api" className={`text-[var(--text-primary-default)] underline-offset-2 hover:underline ${tx}`}>
+                  API
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/assets/props"
+                  className={`text-[var(--text-primary-default)] underline-offset-2 hover:underline ${tx}`}
+                >
+                  Props Library
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/assets/materials"
+                  className={`text-[var(--text-primary-default)] underline-offset-2 hover:underline ${tx}`}
+                >
+                  Materials
+                </Link>
+              </li>
+              <li>
+                <Link to="/api" className={`text-[var(--text-primary-default)] underline-offset-2 hover:underline ${tx}`}>
+                  API Keys
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/account"
+                  className={`text-[var(--text-primary-default)] underline-offset-2 hover:underline ${tx}`}
+                >
+                  Account
+                </Link>
+              </li>
+            </ul>
+          </footer>
         </div>
 
         <aside className="flex flex-col gap-[var(--s-400)] lg:sticky lg:top-[calc(3.5rem+var(--s-400)+env(safe-area-inset-top))]">
@@ -218,7 +251,7 @@ export function HomePage() {
                   Browse props and materials with physics properties, collision meshes, and SimReady tier classifications.
                 </p>
                 <Link
-                  to="/assets/props"
+                  to="/assets"
                   className={`mt-[var(--s-400)] inline-flex items-center gap-0.5 text-[14px] font-medium text-[var(--text-primary-default)] hover:underline ${tx}`}
                 >
                   Browse assets
@@ -237,7 +270,7 @@ export function HomePage() {
                 <span className="material-symbols-outlined text-[22px]">auto_awesome</span>
               </span>
               <div>
-                <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">SimReady generation</h2>
+                <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">SimReady</h2>
                 <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
                   Convert any 3D model into a simulation-ready USD asset with physics and articulation.
                 </p>

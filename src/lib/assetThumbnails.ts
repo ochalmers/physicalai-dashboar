@@ -1,7 +1,8 @@
+import { MATERIAL_PHOTO_URLS, PROP_PHOTO_URLS } from "./libraryImageUrls";
+
 /**
- * Kitchen reference set — thumbnails styled as macro photography / high-res surface close-ups.
- * Palette: espresso shaker wood (vertical grain), brushed brass, white quartz, subway tile,
- * travertine floor, glass — matches the Physical AI Kitchen configurator look (no external URLs).
+ * Kitchen reference set — SVG fallbacks when photo URLs are unavailable.
+ * Primary previews use high-res photos from `libraryImageUrls.ts` (Unsplash).
  */
 
 const W = 640;
@@ -55,6 +56,24 @@ function woodGrainVertical(cx: number, w: number, y0: number, y1: number): strin
   }
   return s;
 }
+
+/** Map catalog ids to an existing generated thumbnail key */
+export const PROP_THUMB_ALIASES: Record<string, string> = {
+  "prop-stemless-wine": "prop-wine-glasses",
+  "prop-oak-cutting-board": "prop-oak-board",
+  "prop-dining-chair": "prop-counter-stool",
+  "prop-dining-table": "prop-kitchen-island",
+  "prop-sofa-3": "prop-kitchen-island",
+  "prop-dishwasher": "prop-oven-bi",
+  "prop-drawer-900": "prop-base-cab-600",
+  "prop-fridge-freezer": "prop-pantry-tall",
+  "prop-coffee-machine": "prop-gooseneck-kettle",
+  "prop-dinner-plate": "prop-mason-jar",
+  "prop-floor-lamp": "prop-pendant",
+  "prop-bar-stool": "prop-counter-stool",
+  "prop-microwave": "prop-oven-bi",
+  "prop-spice-rack": "prop-oak-board",
+};
 
 export const PROP_THUMBNAILS: Record<string, string> = {
   "prop-mason-jar": propShot(
@@ -249,6 +268,36 @@ export const MATERIAL_THUMBNAILS: Record<string, string> = {
     <ellipse cx="320" cy="200" rx="220" ry="120" fill="#ffffff" stroke="${K.line}" stroke-width="1.5" opacity="0.85"/>
     <path fill="none" stroke="${K.quartzVein}" stroke-width="0.8" opacity="0.25" d="M120 180 Q320 140 520 200"/>`,
   ),
+  "mat-abs-plastic": matMacro(
+    `<defs><linearGradient id="abs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3e8ff"/><stop offset="1" stop-color="#ddd6fe"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#abs)"/>
+    <path stroke="#c4b5fd" stroke-width="12" opacity="0.35" d="M40 80h560M40 200h560M120 0v400"/>`,
+  ),
+  "mat-rubber": matMacro(
+    `<defs><linearGradient id="rub" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0e7ff"/><stop offset="1" stop-color="#c7d2fe"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#rub)"/>
+    <circle cx="200" cy="160" r="60" fill="#a5b4fc" opacity="0.35"/><circle cx="440" cy="240" r="80" fill="#818cf8" opacity="0.25"/>`,
+  ),
+  "mat-leather": matMacro(
+    `<defs><linearGradient id="lea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ede9fe"/><stop offset="1" stop-color="#ddd6fe"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#lea)"/>
+    <path fill="none" stroke="#8b5cf6" stroke-width="0.8" opacity="0.25" d="M0 120 Q320 80 640 140M0 280 Q320 240 640 300"/>`,
+  ),
+  "mat-cotton": matMacro(
+    `<defs><linearGradient id="cot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0f2fe"/><stop offset="1" stop-color="#bae6fd"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#cot)"/>
+    <path stroke="#7dd3fc" stroke-width="10" opacity="0.3" d="M0 100h640M0 200h640M0 300h640"/>`,
+  ),
+  "mat-carpet": matMacro(
+    `<defs><linearGradient id="car" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5f3ff"/><stop offset="1" stop-color="#e9d5ff"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#car)"/>
+    <path stroke="#d8b4fe" stroke-width="6" opacity="0.4" d="M0 60h640M0 120h640M0 180h640M0 240h640M0 300h640M0 360h640"/>`,
+  ),
+  "mat-velvet": matMacro(
+    `<defs><linearGradient id="vel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ede9fe"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs>
+    <rect width="${W}" height="${H}" fill="url(#vel)"/>
+    <ellipse cx="320" cy="200" rx="200" ry="100" fill="#a78bfa" opacity="0.2"/>`,
+  ),
 };
 
 function fallbackThumb(label: string): string {
@@ -257,8 +306,22 @@ function fallbackThumb(label: string): string {
   );
 }
 
+/** Local PNGs in `public/catalog/props/{id}.png` (see `assets/Props` source). */
+export function catalogPropUrl(id: string): string {
+  return `/catalog/props/${id}.png`;
+}
+
+/** Local PNGs in `public/catalog/materials/{id}.png` (see `assets/Materials` source). */
+export function catalogMaterialUrl(id: string): string {
+  return `/catalog/materials/${id}.png`;
+}
+
 export function propThumbnail(id: string): string {
-  return PROP_THUMBNAILS[id] ?? fallbackThumb(id);
+  if (id.startsWith("prop-")) {
+    return catalogPropUrl(id);
+  }
+  const resolved = PROP_THUMB_ALIASES[id] ?? id;
+  return PROP_PHOTO_URLS[resolved] ?? PROP_THUMBNAILS[resolved] ?? PROP_THUMBNAILS[id] ?? fallbackThumb(id);
 }
 
 export function propPreviewUrls(id: string): string[] {
@@ -266,5 +329,8 @@ export function propPreviewUrls(id: string): string[] {
 }
 
 export function materialThumbnail(id: string): string {
-  return MATERIAL_THUMBNAILS[id] ?? fallbackThumb(id);
+  if (id.startsWith("mat-")) {
+    return catalogMaterialUrl(id);
+  }
+  return MATERIAL_PHOTO_URLS[id] ?? MATERIAL_THUMBNAILS[id] ?? fallbackThumb(id);
 }

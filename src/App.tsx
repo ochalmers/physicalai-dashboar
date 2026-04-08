@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import { HomePage } from "@/pages/HomePage";
+import { AssetsHubPage } from "@/pages/AssetsHubPage";
 import { PropsPage } from "@/pages/PropsPage";
 import { MaterialsPage } from "@/pages/MaterialsPage";
 import { EnvironmentLibraryPage } from "@/pages/EnvironmentLibraryPage";
@@ -20,6 +21,7 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/assets" element={<AssetsHubPage />} />
           <Route path="/assets/props" element={<PropsPage />} />
           <Route path="/assets/materials" element={<MaterialsPage />} />
           <Route path="/environments" element={<EnvironmentLibraryPage />} />

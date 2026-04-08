@@ -1,20 +1,22 @@
 /**
- * Dashboard product-window model: users explore deeply; some write paths stay gated until access is granted.
- * Persisted locally for the demo; a real app would resolve from org entitlements.
+ * Access model: Explore (browse, configure, preview) vs Full (generate jobs, export, API keys).
+ * Persisted locally for the demo; production would resolve org entitlements.
  */
 
-/** `full` = FULL_ACCESS — API credentials, batch jobs, export pipelines, etc. */
-export type AccessTier = "explore" | "standard" | "full";
+export type AccessTier = "explore" | "full";
 
 export const ACCESS_STORAGE_KEY = "imagine.dashboard.accessTier";
 
 export type GatedFeature = "api_keys_write" | "batch_submit" | "full_export";
 
+/** Single tooltip for locks and Explore badges */
+export const FULL_ACCESS_TOOLTIP =
+  "Batch queueing, exports, and API keys require Full access. Switch under Account.";
+
 export function readAccessTier(): AccessTier {
   try {
     const v = localStorage.getItem(ACCESS_STORAGE_KEY);
     if (v === "full") return "full";
-    if (v === "standard") return "standard";
     return "explore";
   } catch {
     return "explore";
@@ -24,6 +26,18 @@ export function readAccessTier(): AccessTier {
 export function writeAccessTier(tier: AccessTier) {
   try {
     localStorage.setItem(ACCESS_STORAGE_KEY, tier);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Migrate legacy `standard` tier on read */
+export function migrateAccessTierStorage() {
+  try {
+    const v = localStorage.getItem(ACCESS_STORAGE_KEY);
+    if (v === "standard") {
+      localStorage.setItem(ACCESS_STORAGE_KEY, "explore");
+    }
   } catch {
     /* ignore */
   }
@@ -39,16 +53,11 @@ export function canUseFeature(tier: AccessTier, feature: GatedFeature): boolean 
 }
 
 export const ACCESS_COPY = {
-  exploreBanner:
-    "Explore mode: browse the full surface area. Sensitive write actions stay simulated until your workspace is provisioned.",
-  apiKeysGated:
-    "HTTP reference and examples below are readable without credentials. Issuing or revoking API keys requires Full access.",
+  apiKeysGated: "HTTP reference below is always available. Issuing or revoking keys requires Full access.",
   apiModalIntro:
-    "Provisioning enables workspace-scoped credentials for authenticated requests against the Physical AI HTTP API:",
-  exportModalIntro:
-    "Export entitlements unlock artifact retrieval from the generation and asset pipelines:",
+    "Provisioning enables workspace-scoped credentials for authenticated requests to the Physical AI HTTP API.",
+  exportModalIntro: "Export entitlements unlock artifact retrieval from generation and asset pipelines:",
   batchGated:
-    "Queueing batch jobs requires Full access. You can still explore parameters, combinations, and validation below.",
-  batchModalIntro:
-    "Full access enables your workspace to run generation jobs on the cluster, including:",
+    "You can select parameter ranges and review validation. Queueing jobs requires Full access.",
+  batchModalIntro: "Full access enables your workspace to run variation jobs on the cluster, including:",
 } as const;

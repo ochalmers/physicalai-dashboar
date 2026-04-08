@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { readAccessTier, writeAccessTier, type AccessTier } from "@/lib/access";
+import { migrateAccessTierStorage, readAccessTier, writeAccessTier, type AccessTier } from "@/lib/access";
 
 const STORAGE_KEY = "imagine.auth.session";
 const SIGNED_OUT_KEY = "imagine.auth.signedOut";
@@ -92,7 +92,7 @@ function displayNameFromEmail(email: string) {
 type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  /** Product window: explore / standard vs full (API keys, batch jobs, export pipelines). */
+  /** Explore vs Full (batch queue, exports, API keys). */
   accessTier: AccessTier;
   setAccessTier: (tier: AccessTier) => void;
   signIn: (email: string, password: string) => Promise<void>;
@@ -105,7 +105,10 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const user = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const [accessTier, setAccessTierState] = useState<AccessTier>(() => readAccessTier());
+  const [accessTier, setAccessTierState] = useState<AccessTier>(() => {
+    migrateAccessTierStorage();
+    return readAccessTier();
+  });
 
   const setAccessTier = useCallback((tier: AccessTier) => {
     writeAccessTier(tier);

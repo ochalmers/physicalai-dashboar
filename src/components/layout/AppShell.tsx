@@ -8,6 +8,12 @@ import { Sidebar } from "./Sidebar";
 
 export function AppShell() {
   const location = useLocation();
+  const fullBleedContent =
+    location.pathname.startsWith("/assets/props") ||
+    location.pathname.startsWith("/assets/materials");
+  const contentWidthClass = fullBleedContent
+    ? "w-full max-w-none"
+    : "mx-auto w-full max-w-[1200px]";
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { mounted: backdropMounted, show: backdropShow } = usePresence(mobileNavOpen);
 
@@ -34,7 +40,7 @@ export function AppShell() {
   }, [backdropMounted]);
 
   return (
-    <div className="min-h-[100dvh] bg-[var(--surface-page)]">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--surface-page)]">
       <Sidebar mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
       {backdropMounted ? (
@@ -51,9 +57,11 @@ export function AppShell() {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col md:pl-[272px]">
         <AppTopBar onOpenNav={() => setMobileNavOpen(true)} navOpen={mobileNavOpen} />
 
-        <main className="mx-auto w-full max-w-[1200px] flex-1 px-[var(--s-300)] pb-[max(var(--s-500),env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-400))] sm:px-[var(--s-400)] md:px-[var(--s-600)] md:pb-[var(--s-500)] md:pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-500))]">
+        <main className="w-full max-w-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-[var(--s-300)] pb-[max(var(--s-500),env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-400))] sm:px-[var(--s-400)] md:px-[var(--s-600)] md:pb-[var(--s-500)] md:pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-500))] [-webkit-overflow-scrolling:touch]">
           <PageTransition>
-            <Outlet />
+            <div className={contentWidthClass}>
+              <Outlet />
+            </div>
           </PageTransition>
         </main>
       </div>

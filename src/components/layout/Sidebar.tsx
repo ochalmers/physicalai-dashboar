@@ -34,6 +34,9 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
     onClose();
   };
 
+  const assetsNavActive = location.pathname.startsWith("/assets");
+  const environmentsNavActive = location.pathname.startsWith("/environments");
+
   return (
     <aside
       id="app-sidebar-nav"
@@ -50,7 +53,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         <Link
           to="/"
           onClick={afterNav}
-          className={`rounded-br200 outline-none ring-offset-2 ring-offset-[#121212] focus-visible:ring-2 focus-visible:ring-[var(--papaya-500)] ${tx}`}
+          className={`outline-none ring-offset-2 ring-offset-[#121212] focus-visible:ring-2 focus-visible:ring-[var(--papaya-500)] ${tx}`}
           aria-label="Home"
         >
           <img src="/logos/Horizontal.svg" alt="imagine.io" className="h-8 w-auto" />
@@ -59,7 +62,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           type="button"
           aria-label="Close menu"
           onClick={onClose}
-          className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-br200 text-[#b0b0b0] hover:bg-[#1a1a1a] hover:text-white active:scale-[0.97] md:hidden ${tx}`}
+          className={`flex min-h-[44px] min-w-[44px] items-center justify-center text-[#b0b0b0] hover:bg-[#1a1a1a] hover:text-white active:scale-[0.97] md:hidden ${tx}`}
         >
           <span className="material-symbols-outlined text-[22px]">close</span>
         </button>
@@ -75,7 +78,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           className={({ isActive }) =>
             cn(
               tx,
-              "group relative flex items-center gap-[var(--s-300)] rounded-br200 py-[var(--s-200)] pl-[var(--s-300)] pr-[var(--s-300)] text-[14px] leading-[20px]",
+              "group relative flex items-center gap-[var(--s-300)] py-[var(--s-200)] pl-[var(--s-300)] pr-[var(--s-300)] text-[14px] leading-[20px]",
               navRow,
               isActive
                 ? "bg-[#1e1e1e] text-[var(--papaya-500)] shadow-[inset_3px_0_0_0_var(--papaya-500)]"
@@ -98,28 +101,47 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           )}
         </NavLink>
 
-        {/* Asset Library — collapsible */}
+        {/* Assets — summary link + collapsible subnav */}
         <div className="flex flex-col">
-          <button
-            type="button"
-            onClick={() => setAssetOpen((o) => !o)}
-            className={cn(
-              tx,
-              "group flex w-full items-center gap-[var(--s-300)] rounded-br200 px-[var(--s-300)] text-left text-[14px]",
-              navRow,
-              muted,
-              "hover:bg-[#1a1a1a] hover:text-[#b0b0b0]",
-            )}
-            aria-expanded={assetOpen}
-          >
-            <span className="material-symbols-outlined text-[20px] text-[#888888] group-hover:text-[#b0b0b0]">
-              inventory_2
-            </span>
-            <span className="min-w-0 flex-1">Asset Library</span>
-            <span className="material-symbols-outlined text-[18px] text-[#666666] transition-transform duration-250 ease-out group-hover:text-[#888888]">
-              {assetOpen ? "expand_more" : "chevron_right"}
-            </span>
-          </button>
+          <div className="flex w-full min-w-0 items-stretch">
+            <Link
+              to="/assets"
+              onClick={afterNav}
+              className={cn(
+                tx,
+                "group relative flex min-w-0 flex-1 items-center gap-[var(--s-300)] py-[var(--s-200)] pl-[var(--s-300)] pr-[var(--s-100)] text-left text-[14px] leading-[20px]",
+                navRow,
+                assetsNavActive
+                  ? "bg-[#1e1e1e] text-[var(--papaya-500)] shadow-[inset_3px_0_0_0_var(--papaya-500)]"
+                  : cn(muted, "hover:bg-[#1a1a1a] hover:text-[#b0b0b0]"),
+              )}
+            >
+              <span
+                className={cn(
+                  "material-symbols-outlined shrink-0 text-[20px] transition-colors duration-250 ease-out",
+                  assetsNavActive ? "text-[var(--papaya-500)]" : "text-[#888888] group-hover:text-[#b0b0b0]",
+                )}
+              >
+                inventory_2
+              </span>
+              <span className="min-w-0 flex-1 truncate">Assets</span>
+            </Link>
+            <button
+              type="button"
+              aria-label={assetOpen ? "Collapse assets menu" : "Expand assets menu"}
+              aria-expanded={assetOpen}
+              onClick={() => setAssetOpen((o) => !o)}
+              className={cn(
+                tx,
+                "shrink-0 px-[var(--s-200)] py-[var(--s-200)] text-[#666666] hover:bg-[#1a1a1a] hover:text-[#b0b0b0] md:py-[var(--s-200)]",
+                navRow,
+              )}
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {assetOpen ? "expand_more" : "chevron_right"}
+              </span>
+            </button>
+          </div>
           {assetOpen ? (
             <div className={cn(subIndent, "flex flex-col gap-[2px] py-[var(--s-100)]")}>
               <NavLink
@@ -128,7 +150,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 className={({ isActive }) =>
                   cn(
                     tx,
-                    "flex rounded-br100 py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
+                    "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
                     isActive
                       ? "font-medium text-[var(--papaya-500)]"
                       : "text-[#a3a3a3] hover:text-[#d4d4d4]",
@@ -143,7 +165,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 className={({ isActive }) =>
                   cn(
                     tx,
-                    "flex rounded-br100 py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
+                    "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
                     isActive
                       ? "font-medium text-[var(--papaya-500)]"
                       : "text-[#a3a3a3] hover:text-[#d4d4d4]",
@@ -156,28 +178,47 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           ) : null}
         </div>
 
-        {/* Environment Library */}
+        {/* Environments — summary link + collapsible subnav */}
         <div className="flex flex-col">
-          <button
-            type="button"
-            onClick={() => setEnvOpen((o) => !o)}
-            className={cn(
-              tx,
-              "group flex w-full items-center gap-[var(--s-300)] rounded-br200 px-[var(--s-300)] text-left text-[14px]",
-              navRow,
-              muted,
-              "hover:bg-[#1a1a1a] hover:text-[#b0b0b0]",
-            )}
-            aria-expanded={envOpen}
-          >
-            <span className="material-symbols-outlined text-[20px] text-[#888888] group-hover:text-[#b0b0b0]">
-              layers
-            </span>
-            <span className="min-w-0 flex-1">Environment Library</span>
-            <span className="material-symbols-outlined text-[18px] text-[#666666] group-hover:text-[#888888]">
-              {envOpen ? "expand_more" : "chevron_right"}
-            </span>
-          </button>
+          <div className="flex w-full min-w-0 items-stretch">
+            <Link
+              to="/environments"
+              onClick={afterNav}
+              className={cn(
+                tx,
+                "group relative flex min-w-0 flex-1 items-center gap-[var(--s-300)] py-[var(--s-200)] pl-[var(--s-300)] pr-[var(--s-100)] text-left text-[14px] leading-[20px]",
+                navRow,
+                environmentsNavActive
+                  ? "bg-[#1e1e1e] text-[var(--papaya-500)] shadow-[inset_3px_0_0_0_var(--papaya-500)]"
+                  : cn(muted, "hover:bg-[#1a1a1a] hover:text-[#b0b0b0]"),
+              )}
+            >
+              <span
+                className={cn(
+                  "material-symbols-outlined shrink-0 text-[20px] transition-colors duration-250 ease-out",
+                  environmentsNavActive ? "text-[var(--papaya-500)]" : "text-[#888888] group-hover:text-[#b0b0b0]",
+                )}
+              >
+                layers
+              </span>
+              <span className="min-w-0 flex-1 truncate">Environments</span>
+            </Link>
+            <button
+              type="button"
+              aria-label={envOpen ? "Collapse environments menu" : "Expand environments menu"}
+              aria-expanded={envOpen}
+              onClick={() => setEnvOpen((o) => !o)}
+              className={cn(
+                tx,
+                "shrink-0 px-[var(--s-200)] py-[var(--s-200)] text-[#666666] hover:bg-[#1a1a1a] hover:text-[#b0b0b0] md:py-[var(--s-200)]",
+                navRow,
+              )}
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {envOpen ? "expand_more" : "chevron_right"}
+              </span>
+            </button>
+          </div>
           {envOpen ? (
             <div className={cn(subIndent, "flex flex-col gap-[2px] py-[var(--s-100)]")}>
               <NavLink
@@ -186,14 +227,14 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 className={({ isActive }) =>
                   cn(
                     tx,
-                    "flex items-center justify-between gap-[var(--s-200)] rounded-br100 py-[10px] text-[13px] md:py-[6px]",
+                    "flex items-center justify-between gap-[var(--s-200)] py-[10px] text-[13px] md:py-[6px]",
                     isActive ? "font-medium text-[var(--papaya-500)]" : "text-[#a3a3a3] hover:text-[#d4d4d4]",
                   )
                 }
               >
                 <span>Kitchen</span>
                 <span className="shrink-0 rounded-full bg-[#0d2a1a] px-[8px] py-[3px] text-[10px] font-semibold uppercase leading-none tracking-wide text-[var(--green-500)]">
-                  • Live
+                  Live
                 </span>
               </NavLink>
               <div className="flex min-h-[40px] items-center justify-between py-[6px] text-[13px] text-[#666666] md:min-h-0">
@@ -214,7 +255,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 className={({ isActive }) =>
                   cn(
                     tx,
-                    "flex rounded-br100 py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
+                    "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
                     isActive
                       ? "font-medium text-[var(--papaya-500)]"
                       : "text-[#a3a3a3] hover:text-[#d4d4d4]",
@@ -229,29 +270,14 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                 className={({ isActive }) =>
                   cn(
                     tx,
-                    "flex rounded-br100 py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
+                    "flex py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
                     isActive
                       ? "font-medium text-[var(--papaya-500)]"
                       : "text-[#a3a3a3] hover:text-[#d4d4d4]",
                   )
                 }
               >
-                Batch Generation
-              </NavLink>
-              <NavLink
-                to="/environments"
-                onClick={afterNav}
-                className={({ isActive }) =>
-                  cn(
-                    tx,
-                    "flex rounded-br100 py-[10px] text-[13px] max-md:min-h-[44px] max-md:items-center max-md:leading-none md:py-[6px]",
-                    isActive
-                      ? "font-medium text-[var(--papaya-500)]"
-                      : "text-[#a3a3a3] hover:text-[#d4d4d4]",
-                  )
-                }
-              >
-                Overview
+                Batch variations
               </NavLink>
             </div>
           ) : null}
@@ -264,7 +290,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           className={({ isActive }) =>
             cn(
               tx,
-              "flex items-center justify-between gap-[var(--s-200)] rounded-br200 px-[var(--s-300)] text-[14px] leading-snug",
+              "flex items-center justify-between gap-[var(--s-200)] px-[var(--s-300)] text-[14px] leading-snug",
               navRow,
               "bg-[#1a1a1a]/80 hover:bg-[#222222]",
               isActive ? "ring-1 ring-[var(--papaya-500)]/40" : "",
@@ -273,7 +299,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         >
           <span className="flex items-center gap-[var(--s-300)] text-[var(--papaya-500)]">
             <span className="material-symbols-outlined text-[20px] text-[var(--papaya-500)]">auto_awesome</span>
-            SimReady Generation
+            SimReady
           </span>
           <span className="shrink-0 rounded-full bg-[#2a2a2a] px-[8px] py-[3px] text-[10px] font-semibold uppercase leading-none text-[#a3a3a3]">
             Soon
@@ -288,7 +314,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             className={({ isActive }) =>
               cn(
                 tx,
-                "group flex items-center gap-[var(--s-300)] rounded-br200 px-[var(--s-300)] text-[14px]",
+                "group flex items-center gap-[var(--s-300)] px-[var(--s-300)] text-[14px]",
                 navRow,
                 isActive
                   ? "bg-[#1e1e1e] text-[var(--papaya-500)] shadow-[inset_3px_0_0_0_var(--papaya-500)]"
@@ -316,7 +342,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             className={({ isActive }) =>
               cn(
                 tx,
-                "group flex items-center gap-[var(--s-300)] rounded-br200 px-[var(--s-300)] text-[14px]",
+                "group flex items-center gap-[var(--s-300)] px-[var(--s-300)] text-[14px]",
                 navRow,
                 isActive
                   ? "bg-[#1e1e1e] text-[var(--papaya-500)] shadow-[inset_3px_0_0_0_var(--papaya-500)]"
