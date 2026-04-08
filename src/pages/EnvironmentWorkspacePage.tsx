@@ -58,6 +58,24 @@ const tabs: { id: WorkspaceTab; label: string }[] = [
   { id: "downloads", label: "Downloads" },
 ];
 
+type BatchFilterGroup = {
+  label: string;
+  options: string[];
+};
+
+const BATCH_FILTERS: BatchFilterGroup[] = [
+  { label: "Lighting", options: ["Bright Daylight", "Warm Evening", "Dim Artificial"] },
+  { label: "Clutter Density", options: ["Empty", "Moderate", "Dense"] },
+  { label: "Camera Angle", options: ["Wide", "Counter", "Top-down"] },
+];
+
+const VARIATION_CARDS = Array.from({ length: 16 }).map((_, idx) => ({
+  id: `VAR-${String(idx + 1).padStart(4, "0")}`,
+  subtitle: idx % 2 === 0 ? "L-Shaped · Slab · Black Acrylic" : "U-Shaped · Shaker · Quartz Cloud",
+  lighting: idx % 3 === 0 ? "Bright Daylight" : idx % 3 === 1 ? "Warm Evening" : "Dim Artificial",
+  clutter: idx % 2 === 0 ? "Moderate" : "Dense",
+}));
+
 function WorkspaceNav({ environmentSlug }: { environmentSlug: string }) {
   return (
     <nav className="border-b border-[var(--border-default-secondary)]">
@@ -84,24 +102,136 @@ function WorkspaceNav({ environmentSlug }: { environmentSlug: string }) {
   );
 }
 
+function BatchVariationsPanel({ environmentSlug }: { environmentSlug: string }) {
+  const [filters, setFilters] = useState<Record<string, string[]>>({
+    Lighting: ["Bright Daylight"],
+    "Clutter Density": ["Moderate"],
+    "Camera Angle": [],
+  });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const filteredCards = VARIATION_CARDS.filter((card) => {
+    const lighting = filters.Lighting ?? [];
+    const clutter = filters["Clutter Density"] ?? [];
+    const camera = filters["Camera Angle"] ?? [];
+    const lightingMatch = lighting.length === 0 || lighting.includes(card.lighting);
+    const clutterMatch = clutter.length === 0 || clutter.includes(card.clutter);
+    const cameraMatch = camera.length === 0 || camera.includes("Wide");
+    return lightingMatch && clutterMatch && cameraMatch;
+  });
+
+  const toggleFilter = (group: string, value: string) => {
+    setFilters((prev) => {
+      const set = new Set(prev[group] ?? []);
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+      return { ...prev, [group]: Array.from(set) };
+    });
+  };
+
+  const toggleCard = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const selectAll = () => {
+    setSelectedIds(filteredCards.map((c) => c.id));
+  };
+
+  const clearAll = () => setSelectedIds([]);
+
+  const generateSelected = () => {
+    if (!selectedIds.length || isGenerating) return;
+    setIsGenerating(true);
+    window.setTimeout(() => {
+      setIsGenerating(false);
+      alert(`Generation started for ${selectedIds.length} variation(s) in ${environmentSlug}.`);
+    }, 450);
+  };
+
+  return (
+    <div className="space-y-[var(--s-300)]">
+      <div className="flex flex-wrap items-center gap-[var(--s-200)] rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-300)]">
+        <p className="text-[13px] text-[var(--text-default-body)]">
+          <span className="font-medium text-[var(--text-default-heading)]">{selectedIds.length}</span> selected
+        </p>
+        <Button variant="primary" onClick={generateSelected} disabled={!selectedIds.length || isGenerating}>
+          {isGenerating ? "Generating..." : "Generate Selected"}
+        </Button>
+        <Button variant="secondary" onClick={selectAll}>
+          Select All
+        </Button>
+        <Button variant="secondary" onClick={clearAll}>
+          Clear
+        </Button>
+      </div>
+
+      <div className="grid gap-[var(--s-300)] lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="space-y-[var(--s-300)]">
+          {BATCH_FILTERS.map((group) => (
+            <Card key={group.label} title={group.label}>
+              <div className="space-y-[var(--s-200)]">
+                {group.options.map((opt) => {
+                  const checked = (filters[group.label] ?? []).includes(opt);
+                  return (
+                    <label key={opt} className="flex cursor-pointer items-center gap-[var(--s-200)] text-[13px] text-[var(--text-default-heading)]">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleFilter(group.label, opt)}
+                        className="h-4 w-4 rounded border-[var(--border-default-secondary)]"
+                      />
+                      {opt}
+                    </label>
+                  );
+                })}
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid gap-[var(--s-300)] sm:grid-cols-2 xl:grid-cols-4">
+          {filteredCards.map((card) => {
+            const selected = selectedIds.includes(card.id);
+            return (
+              <button
+                type="button"
+                key={card.id}
+                onClick={() => toggleCard(card.id)}
+                className={`overflow-hidden rounded-br200 border text-left transition-[border-color,box-shadow,transform] duration-200 ${
+                  selected
+                    ? "border-[var(--border-primary-default)] shadow-[0_0_0_1px_var(--border-primary-default)]"
+                    : "border-[var(--border-default-secondary)]"
+                }`}
+              >
+                <div className="flex h-[96px] items-center justify-center bg-[var(--surface-page-secondary)]">
+                  <span className="material-symbols-outlined text-[24px] text-[var(--text-default-placeholder)]">deployed_code</span>
+                </div>
+                <div className="space-y-[6px] p-[var(--s-300)]">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[12px] font-semibold text-[var(--text-default-heading)]">{card.id}</p>
+                    <input type="checkbox" readOnly checked={selected} className="h-4 w-4 rounded" />
+                  </div>
+                  <p className="text-[12px] text-[var(--text-default-body)]">{card.subtitle}</p>
+                  <p className="text-[12px] text-[var(--text-default-placeholder)]">
+                    {card.lighting} · {card.clutter}
+                  </p>
+                  <p className="text-[12px] font-medium text-[var(--text-success-default)]">Ready</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WorkspacePanel({ section, environmentSlug }: { section: WorkspaceTab; environmentSlug: string }) {
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: fetchJobs, enabled: section === "downloads" });
 
   if (section === "batch") {
-    return (
-      <Card title="Batch variations">
-        <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">
-          Configure parameter sweeps and queue variation jobs from the batch workspace.
-        </p>
-        <Link
-          to={`/environments/${environmentSlug}/batch`}
-          className="mt-[var(--s-300)] inline-flex items-center gap-[var(--s-200)] text-[14px] font-medium text-[var(--text-primary-default)] hover:underline"
-        >
-          Open batch workspace
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </Link>
-      </Card>
-    );
+    return <BatchVariationsPanel environmentSlug={environmentSlug} />;
   }
 
   if (section === "api") {

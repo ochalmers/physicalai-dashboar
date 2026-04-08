@@ -20,21 +20,25 @@ const envItems = [
   {
     label: "Kitchen",
     to: "/environments/kitchen/batch",
+    dot: "bg-[var(--green-500)]",
     thumbnail: "/assets/environments/kitchen.jpg",
   },
   {
     label: "Living Room",
     to: "/environments/living-room/batch",
+    dot: "",
     thumbnail: "/assets/environments/livingroom.png",
   },
   {
     label: "Warehouse",
     to: "/environments/warehouse/batch",
+    dot: "",
     thumbnail: "/assets/environments/warehouse.png",
   },
   {
     label: "Retail Store",
     to: "/environments/retail-store/batch",
+    dot: "",
     thumbnail: "/assets/environments/store.png",
   },
 ] as const;
@@ -270,6 +274,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                     />
                     <span className="truncate">{item.label}</span>
                   </span>
+                  {item.dot ? <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", item.dot)} /> : null}
                 </NavLink>
               ))}
               <button
