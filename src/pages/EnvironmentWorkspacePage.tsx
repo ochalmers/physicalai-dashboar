@@ -84,7 +84,7 @@ function WorkspaceNav({ environmentSlug }: { environmentSlug: string }) {
   );
 }
 
-function WorkspacePanel({ section }: { section: WorkspaceTab }) {
+function WorkspacePanel({ section, environmentSlug }: { section: WorkspaceTab; environmentSlug: string }) {
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: fetchJobs, enabled: section === "downloads" });
 
   if (section === "batch") {
@@ -94,7 +94,7 @@ function WorkspacePanel({ section }: { section: WorkspaceTab }) {
           Configure parameter sweeps and queue variation jobs from the batch workspace.
         </p>
         <Link
-          to="/batch"
+          to={`/environments/${environmentSlug}/batch`}
           className="mt-[var(--s-300)] inline-flex items-center gap-[var(--s-200)] text-[14px] font-medium text-[var(--text-primary-default)] hover:underline"
         >
           Open batch workspace
@@ -245,7 +245,7 @@ export function EnvironmentWorkspacePage() {
             }
           />
           <WorkspaceNav environmentSlug={meta.slug} />
-          <WorkspacePanel section={activeSection} />
+          <WorkspacePanel section={activeSection} environmentSlug={meta.slug} />
         </div>
         {meta.status !== "live" ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-br200 bg-[var(--surface-default)]/68 backdrop-blur-md">

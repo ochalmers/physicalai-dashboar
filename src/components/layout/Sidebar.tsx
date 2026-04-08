@@ -54,7 +54,7 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   useEffect(() => {
     const p = location.pathname;
     if (p.startsWith("/assets")) setAssetOpen(true);
-    if (p.startsWith("/environments") || p === "/batch") setEnvOpen(true);
+    if (p.startsWith("/environments")) setEnvOpen(true);
   }, [location.pathname]);
 
   const afterNav = () => {

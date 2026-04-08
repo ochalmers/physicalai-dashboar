@@ -8,7 +8,6 @@ import { MaterialsPage } from "@/pages/MaterialsPage";
 import { EnvironmentLibraryPage } from "@/pages/EnvironmentLibraryPage";
 import { KitchenConfiguratorPage } from "@/pages/KitchenConfiguratorPage";
 import { EnvironmentWorkspacePage } from "@/pages/EnvironmentWorkspacePage";
-import { BatchGenerationPage } from "@/pages/BatchGenerationPage";
 import { ApiDocsPage } from "@/pages/ApiDocsPage";
 import { SimReadyPage } from "@/pages/SimReadyPage";
 import { AccountPage } from "@/pages/AccountPage";
@@ -29,7 +28,7 @@ export default function App() {
           <Route path="/environments/:environmentSlug/:section" element={<EnvironmentWorkspacePage />} />
           <Route path="/environments/kitchen/configure" element={<KitchenConfiguratorPage />} />
           <Route path="/environments/request-custom" element={<RequestCustomPage />} />
-          <Route path="/batch" element={<BatchGenerationPage />} />
+          <Route path="/batch" element={<Navigate to="/environments/kitchen/batch" replace />} />
           <Route path="/api" element={<ApiDocsPage />} />
           <Route path="/simready" element={<SimReadyPage />} />
           <Route path="/account" element={<AccountPage />} />
