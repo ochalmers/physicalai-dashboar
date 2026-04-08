@@ -338,7 +338,7 @@ function PropDetail({
         </table>
       </div>
 
-      <div className="space-y-[var(--s-300)]">
+      <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] space-y-[var(--s-300)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)]">
         <Button
           variant="primary"
           className={`w-full ${txBtn}`}

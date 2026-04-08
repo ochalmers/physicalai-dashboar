@@ -14,7 +14,7 @@ const SIGNED_OUT_KEY = "imagine.auth.signedOut";
 
 const DEMO_USER: AuthUser = {
   email: "demo@imagine.io",
-  name: "Riley Chen",
+  name: "Demo User",
   orgLabel: "imagine.io",
 };
 
@@ -31,6 +31,11 @@ function readStoredUser(): AuthUser | null {
     if (raw) {
       const parsed = JSON.parse(raw) as AuthUser;
       if (!parsed?.email || !parsed?.name) return null;
+      // Keep demo sessions aligned with current default profile copy.
+      if (parsed.email === DEMO_USER.email && parsed.name !== DEMO_USER.name) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_USER));
+        return DEMO_USER;
+      }
       return parsed;
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DEMO_USER));

@@ -93,7 +93,7 @@ export function TalkToTeamModal({ open, onClose, context = "general" }: TalkToTe
                 </label>
               ))}
             </fieldset>
-            <div className="flex flex-col gap-[var(--s-200)] sm:flex-row sm:justify-end">
+            <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] flex flex-col gap-[var(--s-200)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)] sm:flex-row sm:justify-end">
               <Button variant="primary" type="submit">
                 Continue
               </Button>
@@ -136,7 +136,7 @@ export function TalkToTeamModal({ open, onClose, context = "general" }: TalkToTe
                 className="rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] text-[var(--text-default-heading)]"
               />
             </label>
-            <div className="flex flex-col gap-[var(--s-200)] sm:flex-row sm:justify-between">
+            <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] flex flex-col gap-[var(--s-200)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)] sm:flex-row sm:justify-between">
               <Button variant="secondary" type="button" onClick={() => setStep(0)}>
                 Back
               </Button>
@@ -160,7 +160,7 @@ export function TalkToTeamModal({ open, onClose, context = "general" }: TalkToTe
                 className="rounded-br100 border border-[var(--border-default-secondary)] px-[var(--s-300)] py-[var(--s-200)] text-[14px] text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)]"
               />
             </label>
-            <div className="flex flex-col gap-[var(--s-200)] sm:flex-row sm:justify-between">
+            <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] flex flex-col gap-[var(--s-200)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)] sm:flex-row sm:justify-between">
               <Button variant="secondary" type="button" onClick={() => setStep(1)}>
                 Back
               </Button>
@@ -184,7 +184,7 @@ export function TalkToTeamModal({ open, onClose, context = "general" }: TalkToTe
               </p>
               <p className="mt-[var(--s-200)]">Demo — no data was transmitted.</p>
             </div>
-            <div className="flex justify-end">
+            <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] flex justify-end border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)]">
               <Button variant="primary" type="button" onClick={onClose}>
                 Done
               </Button>

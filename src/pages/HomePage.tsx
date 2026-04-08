@@ -238,26 +238,47 @@ export function HomePage() {
 
         <aside className="flex flex-col gap-[var(--s-400)] lg:sticky lg:top-[calc(3.5rem+var(--s-400)+env(safe-area-inset-top))]">
           <Card className="p-[var(--s-400)] sm:p-[var(--s-500)]">
-            <div className="flex items-start gap-[var(--s-300)]">
-              <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-br100 border border-[#7eb8ff]/40 bg-[#e8f2ff] text-[#2563eb]"
-                aria-hidden
-              >
-                <span className="material-symbols-outlined text-[22px]">deployed_code</span>
-              </span>
-              <div>
-                <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Asset library</h2>
-                <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
-                  Browse props and materials with physics properties, collision meshes, and SimReady tier classifications.
-                </p>
+            <div>
+              <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Assets summary</h2>
+              <p className="mt-[var(--s-200)] text-[13px] leading-[18px] text-[var(--text-default-body)]">
+                Quick access to core libraries used in scene generation.
+              </p>
+
+              <div className="mt-[var(--s-300)] space-y-[var(--s-300)]">
                 <Link
-                  to="/assets"
-                  className={`mt-[var(--s-400)] inline-flex items-center gap-0.5 text-[14px] font-medium text-[var(--text-primary-default)] hover:underline ${tx}`}
+                  to="/assets/props"
+                  className={`flex items-center justify-between border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] hover:bg-[var(--surface-default)] ${tx}`}
                 >
-                  Browse assets
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  <span className="min-w-0">
+                    <span className="block text-[13px] font-medium text-[var(--text-default-heading)]">Props</span>
+                    <span className="text-[12px] text-[var(--text-default-body)]">
+                      {overview.data.assets.propsCount.toLocaleString()} items
+                    </span>
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--text-default-body)]">arrow_forward</span>
+                </Link>
+
+                <Link
+                  to="/assets/materials"
+                  className={`flex items-center justify-between border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] hover:bg-[var(--surface-default)] ${tx}`}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-[13px] font-medium text-[var(--text-default-heading)]">Materials</span>
+                    <span className="text-[12px] text-[var(--text-default-body)]">
+                      {overview.data.assets.materialsCount.toLocaleString()} items
+                    </span>
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-[var(--text-default-body)]">arrow_forward</span>
                 </Link>
               </div>
+
+              <Link
+                to="/assets"
+                className={`mt-[var(--s-400)] inline-flex items-center gap-0.5 text-[14px] font-medium text-[var(--text-primary-default)] hover:underline ${tx}`}
+              >
+                Open assets summary
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </Link>
             </div>
           </Card>
 

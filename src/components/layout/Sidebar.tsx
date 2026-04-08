@@ -49,20 +49,20 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         mobileOpen ? "translate-x-0 shadow-2xl shadow-black/40" : "-translate-x-full md:translate-x-0",
       )}
     >
-      <div className="flex shrink-0 items-center justify-between px-[var(--s-400)] pb-[var(--s-200)] pt-[max(var(--s-400),env(safe-area-inset-top))] md:justify-start md:pb-0 md:pt-[var(--s-500)]">
+      <div className="relative flex shrink-0 items-center justify-center px-[var(--s-400)] pb-[var(--s-200)] pt-[max(var(--s-400),env(safe-area-inset-top))] md:pb-0 md:pt-[var(--s-500)]">
         <Link
           to="/"
           onClick={afterNav}
           className={`outline-none ring-offset-2 ring-offset-[#121212] focus-visible:ring-2 focus-visible:ring-[var(--papaya-500)] ${tx}`}
           aria-label="Home"
         >
-          <img src="/logos/Horizontal.svg" alt="imagine.io" className="h-8 w-auto" />
+          <img src="/logos/Horizontal.svg" alt="imagine.io" className="h-6 w-auto" />
         </Link>
         <button
           type="button"
           aria-label="Close menu"
           onClick={onClose}
-          className={`flex min-h-[44px] min-w-[44px] items-center justify-center text-[#b0b0b0] hover:bg-[#1a1a1a] hover:text-white active:scale-[0.97] md:hidden ${tx}`}
+          className={`absolute right-[var(--s-300)] top-[max(var(--s-300),env(safe-area-inset-top))] flex min-h-[44px] min-w-[44px] items-center justify-center text-[#b0b0b0] hover:bg-[#1a1a1a] hover:text-white active:scale-[0.97] md:hidden ${tx}`}
         >
           <span className="material-symbols-outlined text-[22px]">close</span>
         </button>

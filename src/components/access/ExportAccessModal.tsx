@@ -28,7 +28,7 @@ export function ExportAccessModal({ open, onClose }: ExportAccessModalProps) {
         <p className="text-[13px] text-[var(--text-default-body)]">
           Browse and inspect catalog metadata without export entitlements; downloads are disabled until provisioned.
         </p>
-        <div className="flex flex-col items-stretch gap-[var(--s-300)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
+        <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] flex flex-col items-stretch gap-[var(--s-300)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
           <Button
             variant="primary"
             className="w-full sm:w-auto sm:min-w-[200px]"

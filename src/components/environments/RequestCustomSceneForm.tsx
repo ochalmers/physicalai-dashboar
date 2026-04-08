@@ -53,9 +53,11 @@ export function RequestCustomSceneForm({ onRequestClose, showCloseAfterSuccess }
           </p>
         </Callout>
         {showCloseAfterSuccess && onRequestClose ? (
-          <Button variant="primary" type="button" className="w-full" onClick={onRequestClose}>
-            Done
-          </Button>
+          <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)]">
+            <Button variant="primary" type="button" className="w-full" onClick={onRequestClose}>
+              Done
+            </Button>
+          </div>
         ) : null}
       </div>
     );
@@ -149,9 +151,11 @@ export function RequestCustomSceneForm({ onRequestClose, showCloseAfterSuccess }
           placeholder="Timeline"
         />
       </label>
-      <Button variant="primary" type="submit" className="mt-[var(--s-200)] w-full py-[var(--s-300)] text-[15px]">
-        Submit Request
-      </Button>
+      <div className="sticky bottom-0 -mx-[var(--s-500)] mt-[var(--s-500)] border-t border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] pb-[max(var(--s-300),env(safe-area-inset-bottom))] pt-[var(--s-300)]">
+        <Button variant="primary" type="submit" className="w-full py-[var(--s-300)] text-[15px]">
+          Submit Request
+        </Button>
+      </div>
     </form>
   );
 }
