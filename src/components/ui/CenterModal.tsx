@@ -8,8 +8,8 @@ type CenterModalProps = {
   title: string;
   onClose: () => void;
   children: ReactNode;
-  /** Wider panel for dense spec tables; `xl` fills the viewport minus padding */
-  size?: "md" | "lg" | "xl";
+  /** Wider panel for dense spec tables; `xl` / `2xl` for wide split layouts (e.g. asset 3D + specs) */
+  size?: "md" | "lg" | "xl" | "2xl";
   /** Detail views (asset specs) read better left-aligned */
   contentAlign?: "center" | "start";
   /** Hide top title bar when content renders its own heading */
@@ -48,13 +48,15 @@ export function CenterModal({
 
   if (!mounted || typeof document === "undefined") return null;
 
-  /** Panel width: never wider than 960px; stays inset on small viewports */
+  /** Panel width; `2xl` fits wide 16:9 preview + spec column */
   const maxW =
-    size === "xl"
-      ? "max-w-[min(960px,calc(100vw-2rem))] sm:max-w-[min(960px,calc(100vw-3rem))]"
-      : size === "lg"
-        ? "max-w-[min(92vw,720px)]"
-        : "max-w-[min(92vw,440px)]";
+    size === "2xl"
+      ? "max-w-[min(1180px,calc(100vw-2rem))] sm:max-w-[min(1180px,calc(100vw-3rem))]"
+      : size === "xl"
+        ? "max-w-[min(960px,calc(100vw-2rem))] sm:max-w-[min(960px,calc(100vw-3rem))]"
+        : size === "lg"
+          ? "max-w-[min(92vw,720px)]"
+          : "max-w-[min(92vw,440px)]";
 
   /**
    * Portal to `document.body`. One scroll container with tinted backdrop; clicking any

@@ -349,6 +349,7 @@ export const MOCK_PROPS: PropAsset[] = [
     materialType: "Stainless Steel",
     thumbnailUrl: thumb("prop-oven-bi"),
     previewUrls: previews("prop-oven-bi"),
+    previewModelUrl: "/assets/3d/oven.glb",
     dimensionsMm: { w: 600, h: 600, d: 550 },
     densityKgM3: 7900,
     physics: {

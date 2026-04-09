@@ -14,6 +14,10 @@ import { CenterModal } from "@/components/ui/CenterModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { canUseFeature } from "@/lib/access";
+import { AssetCardLockOverlay } from "@/components/assets/AssetCardLockOverlay";
+import { MaterialAssetDetail } from "@/components/assets/MaterialAssetDetail";
+import { hasPreviewModel } from "@/lib/assetPreview";
+import { categoryLabel } from "@/lib/materialDisplay";
 import { materialTypeWash } from "@/lib/prismSurfaces";
 import type { MaterialRecord } from "@/types";
 
@@ -28,11 +32,6 @@ function materialFrictionLine(m: MaterialRecord) {
   const ud = m.dynamicFriction.toFixed(2);
   const e = m.restitution.toFixed(2);
   return `us ${us} · ud ${ud} · e ${e}`;
-}
-
-function categoryLabel(m: MaterialRecord) {
-  if (m.categoryLabel) return m.categoryLabel;
-  return m.type.charAt(0).toUpperCase() + m.type.slice(1);
 }
 
 function useMaterialSearchParams() {
@@ -181,14 +180,14 @@ export function MaterialsPage() {
         open={Boolean(selectedId)}
         title={selected?.name ?? "Material"}
         onClose={() => setSelectedId(null)}
-        size="xl"
+        size="2xl"
         contentAlign="start"
         hideHeader
       >
         {detail.isLoading ? (
           <Skeleton className="h-40 w-full" />
         ) : selected ? (
-          <MaterialDetail
+          <MaterialAssetDetail
             material={selected}
             exportAllowed={fullExport}
             onGatedExport={() => setExportModalOpen(true)}
@@ -206,11 +205,18 @@ export function MaterialsPage() {
 
 function MaterialCard({ material, onOpen }: { material: MaterialRecord; onOpen: () => void }) {
   const accent = materialTypeWash(material.type);
+  const canOpen = hasPreviewModel(material.previewModelUrl);
   return (
     <button
       type="button"
-      onClick={onOpen}
-      className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm hover:shadow-md active:scale-[0.99] ${txInteract}`}
+      disabled={!canOpen}
+      title={
+        canOpen ? undefined : "3D preview not available yet — publish a GLB in /public/assets/3d to unlock"
+      }
+      onClick={canOpen ? onOpen : undefined}
+      className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm disabled:cursor-not-allowed disabled:hover:shadow-sm disabled:active:scale-100 ${
+        canOpen ? `hover:shadow-md active:scale-[0.99] ${txInteract}` : ""
+      }`}
     >
       <div className={`relative aspect-[4/3] w-full overflow-hidden rounded-t-[var(--br-200)] ${accent}`}>
         {material.thumbnailUrl ? (
@@ -228,6 +234,7 @@ function MaterialCard({ material, onOpen }: { material: MaterialRecord; onOpen: 
             </span>
           </div>
         )}
+        {!canOpen ? <AssetCardLockOverlay /> : null}
       </div>
       <div className="space-y-[var(--s-200)] px-[var(--s-300)] pb-[var(--s-400)] pt-[var(--s-400)]">
         <h2 className="text-[16px] font-semibold leading-snug text-[var(--text-default-heading)]">{material.name}</h2>
@@ -241,103 +248,3 @@ function MaterialCard({ material, onOpen }: { material: MaterialRecord; onOpen: 
   );
 }
 
-function MaterialDetail({
-  material,
-  exportAllowed,
-  onGatedExport,
-}: {
-  material: MaterialRecord;
-  exportAllowed: boolean;
-  onGatedExport: () => void;
-}) {
-  const run = (fn: () => void) => {
-    if (!exportAllowed) {
-      onGatedExport();
-      return;
-    }
-    fn();
-  };
-
-  return (
-    <div className="grid gap-[var(--s-500)] lg:grid-cols-[minmax(280px,1fr)_minmax(340px,420px)]">
-      <div className="flex min-h-[320px] items-center justify-center overflow-hidden rounded-br200 bg-[var(--surface-page-secondary)] p-[var(--s-300)]">
-        {material.thumbnailUrl ? (
-          <img src={material.thumbnailUrl} alt={material.name} className="h-full w-full object-contain object-center" />
-        ) : (
-          <span className="material-symbols-outlined text-[72px] text-[var(--text-default-placeholder)]/40">texture</span>
-        )}
-      </div>
-
-      <div className="space-y-[var(--s-400)]">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-default-placeholder)]">
-            {categoryLabel(material)}
-          </p>
-          <h3 className="mt-[var(--s-100)] text-[34px] font-semibold leading-tight text-[var(--text-default-heading)]">
-            {material.name}
-          </h3>
-        </div>
-
-        <div>
-          <p className="text-[14px] font-semibold uppercase tracking-[0.04em] text-[var(--text-default-heading)]">
-            Physics Properties
-          </p>
-          <table className="mt-[var(--s-200)] w-full border-collapse text-[13px]">
-            <tbody>
-              {(
-                [
-                  ["Static Friction", String(material.staticFriction)],
-                  ["Dynamic Friction", String(material.dynamicFriction)],
-                  ["Restitution", String(material.restitution)],
-                  ["Density", `${material.densityKgM3} kg/m3`],
-                ] as const
-              ).map(([k, v]) => (
-                <tr key={k} className="border-b border-[var(--border-default-secondary)]">
-                  <td className="py-[var(--s-200)] text-[var(--text-default-body)]">{k}</td>
-                  <td className="py-[var(--s-200)] text-right font-mono text-[var(--text-default-heading)]">{v}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="space-y-[var(--s-200)] pt-[var(--s-100)]">
-          <Button
-            variant="primary"
-            className={`w-full ${txBtn}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                alert("Download queued: Material USD");
-              })
-            }
-          >
-            {!exportAllowed ? (
-              <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                lock
-              </span>
-            ) : null}
-            Download Material USD
-          </Button>
-          <Button
-            variant="secondary"
-            className={`w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] ${txBtn}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                alert("Download queued: PBR textures");
-              })
-            }
-          >
-            {!exportAllowed ? (
-              <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                lock
-              </span>
-            ) : null}
-            Download PBR Textures
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}

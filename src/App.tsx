@@ -13,6 +13,7 @@ import { SimReadyPage } from "@/pages/SimReadyPage";
 import { AccountPage } from "@/pages/AccountPage";
 import { RequestCustomPage } from "@/pages/RequestCustomPage";
 import { SignInPage } from "@/pages/SignInPage";
+import { TalkToTeamFramesPage } from "@/pages/TalkToTeamFramesPage";
 
 export default function App() {
   return (
@@ -25,13 +26,15 @@ export default function App() {
           <Route path="/assets/props" element={<PropsPage />} />
           <Route path="/assets/materials" element={<MaterialsPage />} />
           <Route path="/environments" element={<EnvironmentLibraryPage />} />
+          <Route path="/environments/kitchen/batch" element={<Navigate to="/environments/kitchen/configure" replace />} />
+          <Route path="/environments/kitchen/scene" element={<KitchenConfiguratorPage />} />
           <Route path="/environments/:environmentSlug/:section" element={<EnvironmentWorkspacePage />} />
-          <Route path="/environments/kitchen/configure" element={<KitchenConfiguratorPage />} />
           <Route path="/environments/request-custom" element={<RequestCustomPage />} />
-          <Route path="/batch" element={<Navigate to="/environments/kitchen/batch" replace />} />
+          <Route path="/batch" element={<Navigate to="/environments/kitchen/configure" replace />} />
           <Route path="/api" element={<ApiDocsPage />} />
           <Route path="/simready" element={<SimReadyPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/dev/talk-to-team-frames" element={<TalkToTeamFramesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Route>

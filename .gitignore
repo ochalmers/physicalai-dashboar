@@ -11,3 +11,4 @@ inspo/
 
 # Large export archives (keep generated artifacts out of git)
 assets/*.zip
+assets/3d/**/*.zip

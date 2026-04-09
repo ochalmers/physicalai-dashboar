@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { usePresence } from "@/hooks/usePresence";
 import { txOverlayBackdrop } from "./motion";
+import { AskImagineDock } from "@/components/assistant/AskImagineDock";
 import { AppTopBar } from "./AppTopBar";
+import { mainOffsetFromSidebarClass } from "./sidebarLayout";
 import { PageTransition } from "./PageTransition";
 import { Sidebar } from "./Sidebar";
 
@@ -49,10 +51,10 @@ export function AppShell() {
         />
       ) : null}
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col md:pl-[272px]">
+      <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${mainOffsetFromSidebarClass}`}>
         <AppTopBar onOpenNav={() => setMobileNavOpen(true)} navOpen={mobileNavOpen} />
 
-        <main className="w-full max-w-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-[var(--s-300)] pb-[max(var(--s-500),env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-400))] sm:px-[var(--s-400)] md:px-[var(--s-600)] md:pb-[var(--s-500)] md:pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-500))] [-webkit-overflow-scrolling:touch]">
+        <main className="w-full max-w-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-[var(--s-300)] pb-[max(var(--s-500),env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-400))] sm:px-[var(--s-400)] md:px-[var(--s-600)] md:pb-[var(--s-500)] md:pt-[max(var(--s-500),env(safe-area-inset-top))] [-webkit-overflow-scrolling:touch]">
           <PageTransition>
             <div className={contentWidthClass}>
               <Outlet />
@@ -60,6 +62,8 @@ export function AppShell() {
           </PageTransition>
         </main>
       </div>
+
+      <AskImagineDock />
     </div>
   );
 }

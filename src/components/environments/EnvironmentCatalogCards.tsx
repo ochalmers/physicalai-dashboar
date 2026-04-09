@@ -15,10 +15,10 @@ const txPrimaryCta =
 
 function environmentPath(id: string): string {
   if (id === "env-kitchen-v2") return "/environments/kitchen/configure";
-  if (id.startsWith("env-living")) return "/environments/living-room/batch";
-  if (id.startsWith("env-warehouse")) return "/environments/warehouse/batch";
-  if (id.startsWith("env-retail")) return "/environments/retail-store/batch";
-  return "/environments/kitchen/batch";
+  if (id.startsWith("env-living")) return "/environments/living-room/configure";
+  if (id.startsWith("env-warehouse")) return "/environments/warehouse/configure";
+  if (id.startsWith("env-retail")) return "/environments/retail-store/configure";
+  return "/environments/kitchen/configure";
 }
 
 type EnvironmentCatalogCardsProps = {
@@ -28,6 +28,8 @@ type EnvironmentCatalogCardsProps = {
   showRequestCard?: boolean;
   requestCustomHref?: string;
   onRequestCustom?: () => void;
+  /** Locked (non-live) tiles open Talk to Team instead of navigating to a workspace */
+  onLockedEnvironmentClick?: () => void;
 };
 
 export function EnvironmentCatalogCards({
@@ -36,6 +38,7 @@ export function EnvironmentCatalogCards({
   showRequestCard = true,
   requestCustomHref = "/environments/request-custom",
   onRequestCustom,
+  onLockedEnvironmentClick,
 }: EnvironmentCatalogCardsProps) {
   void accessTier;
 
@@ -104,15 +107,28 @@ export function EnvironmentCatalogCards({
               <p className="flex-1 text-[13px] leading-[20px] text-[var(--text-default-body)]">{description}</p>
 
               <div className="pt-[var(--s-100)]">
-                <Link to={environmentPath(e.id)} className={txPrimaryCta}>
-                  {e.id === "env-kitchen-v2" ? "Open Kitchen" : "Open"}
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                    arrow_forward
-                  </span>
-                </Link>
+                {isActive ? (
+                  <Link to={environmentPath(e.id)} className={txPrimaryCta}>
+                    {e.id === "env-kitchen-v2" ? "Open Kitchen" : "Open"}
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                      arrow_forward
+                    </span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className={txPrimaryCta}
+                    onClick={() => onLockedEnvironmentClick?.()}
+                  >
+                    Talk to Team
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                      arrow_forward
+                    </span>
+                  </button>
+                )}
                 {!isActive ? (
                   <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">
-                    Not available in Explore access.
+                    Not available in Explore access — contact us for timelines.
                   </p>
                 ) : null}
               </div>

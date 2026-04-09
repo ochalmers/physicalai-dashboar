@@ -13,45 +13,18 @@ import { CenterModal } from "@/components/ui/CenterModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { canUseFeature } from "@/lib/access";
+import { AssetCardLockOverlay } from "@/components/assets/AssetCardLockOverlay";
+import { PropAssetDetail } from "@/components/assets/PropAssetDetail";
+import { hasPreviewModel } from "@/lib/assetPreview";
 import { propTagHeroWash, propTagPill } from "@/lib/prismSurfaces";
-import type { PropAsset, PropTagKind, SimReadyTier } from "@/types";
+import { shelfCategory, simReadyLabel, tagLabel } from "@/lib/propDisplay";
+import type { PropAsset } from "@/types";
 
 const txInteract =
   "transition-[color,background-color,border-color,box-shadow,transform] duration-250 ease-out";
 
 const txBtn =
   "inline-flex items-center justify-center gap-[var(--s-200)] transition-[color,background-color,opacity] duration-250 ease-out";
-
-function tagLabel(kind: PropTagKind) {
-  switch (kind) {
-    case "manipulation":
-      return "Manipulation";
-    case "articulated":
-      return "Articulated";
-    case "navigation":
-      return "Navigation";
-  }
-}
-
-const PROP_SHELF_CATEGORY: Record<string, string> = {
-  tableware: "Kitchenware",
-  cabinetry: "Furniture",
-  appliance: "Appliance",
-  decor: "Decor",
-  lighting: "Lighting",
-  furniture: "Furniture",
-  seating: "Seating",
-};
-
-function shelfCategory(slug: string) {
-  return PROP_SHELF_CATEGORY[slug] ?? slug.charAt(0).toUpperCase() + slug.slice(1);
-}
-
-function simReadyLabel(t: SimReadyTier) {
-  if (t === "certified") return "Certified";
-  if (t === "pending") return "Pending";
-  return "Unsupported";
-}
 
 function useAssetSearchParams() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -217,14 +190,14 @@ export function PropsPage() {
         open={Boolean(selectedId)}
         title={selected?.name ?? "Prop"}
         onClose={() => setSelectedId(null)}
-        size="xl"
+        size="2xl"
         contentAlign="start"
         hideHeader
       >
         {detail.isLoading ? (
           <Skeleton className="h-40 w-full" />
         ) : selected ? (
-          <PropDetail
+          <PropAssetDetail
             asset={selected}
             exportAllowed={fullExport}
             onGatedExport={() => setExportModalOpen(true)}
@@ -241,11 +214,18 @@ export function PropsPage() {
 }
 
 function PropCard({ asset, onOpen }: { asset: PropAsset; onOpen: () => void }) {
+  const canOpen = hasPreviewModel(asset.previewModelUrl);
   return (
     <button
       type="button"
-      onClick={onOpen}
-      className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm hover:shadow-md active:scale-[0.99] ${txInteract}`}
+      disabled={!canOpen}
+      title={
+        canOpen ? undefined : "3D preview not available yet — publish a GLB in /public/assets/3d to unlock"
+      }
+      onClick={canOpen ? onOpen : undefined}
+      className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm disabled:cursor-not-allowed disabled:hover:shadow-sm disabled:active:scale-100 ${
+        canOpen ? `hover:shadow-md active:scale-[0.99] ${txInteract}` : ""
+      }`}
     >
       <div className={`relative aspect-[4/3] w-full overflow-hidden ${propTagHeroWash[asset.tag]}`}>
         <span
@@ -260,6 +240,7 @@ function PropCard({ asset, onOpen }: { asset: PropAsset; onOpen: () => void }) {
           decoding="async"
           className="h-full w-full object-cover object-center"
         />
+        {!canOpen ? <AssetCardLockOverlay /> : null}
       </div>
       <div className="space-y-[var(--s-200)] px-[var(--s-300)] pb-[var(--s-400)] pt-[var(--s-400)]">
         <span className="block text-[16px] font-semibold leading-snug text-[var(--text-default-heading)]">
@@ -274,139 +255,3 @@ function PropCard({ asset, onOpen }: { asset: PropAsset; onOpen: () => void }) {
   );
 }
 
-function PropDetail({
-  asset,
-  exportAllowed,
-  onGatedExport,
-}: {
-  asset: PropAsset;
-  exportAllowed: boolean;
-  onGatedExport: () => void;
-}) {
-  const run = (fn: () => void) => {
-    if (!exportAllowed) {
-      onGatedExport();
-      return;
-    }
-    fn();
-  };
-
-  const dims = `${asset.dimensionsMm.w} × ${asset.dimensionsMm.h} × ${asset.dimensionsMm.d} mm`;
-  return (
-    <div className="grid gap-[var(--s-500)] lg:grid-cols-[minmax(280px,1fr)_minmax(340px,420px)]">
-      <div className="flex min-h-[320px] items-center justify-center overflow-hidden rounded-br200 bg-[var(--surface-page-secondary)] p-[var(--s-300)]">
-        <img src={asset.thumbnailUrl} alt={asset.name} className="h-full w-full object-contain object-center" />
-      </div>
-
-      <div className="space-y-[var(--s-400)]">
-        <div>
-          <div className="flex items-center gap-[var(--s-200)]">
-            <span className={`rounded-br100 px-[var(--s-200)] py-[3px] text-[12px] font-semibold ${propTagPill[asset.tag]}`}>
-              {tagLabel(asset.tag)}
-            </span>
-            <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[var(--text-default-placeholder)]">
-              {shelfCategory(asset.category)}
-            </span>
-          </div>
-          <h3 className="mt-[var(--s-100)] text-[34px] font-semibold leading-tight text-[var(--text-default-heading)]">
-            {asset.name}
-          </h3>
-        </div>
-
-        <div>
-          <p className="text-[14px] font-semibold uppercase tracking-[0.04em] text-[var(--text-default-heading)]">
-            Dimensions
-          </p>
-          <table className="mt-[var(--s-200)] w-full border-collapse text-[13px]">
-            <tbody>
-              <tr className="border-b border-[var(--border-default-secondary)]">
-                <td className="py-[var(--s-200)] text-[var(--text-default-body)]">W x H x D</td>
-                <td className="py-[var(--s-200)] text-right font-mono text-[var(--text-default-heading)]">{dims}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div>
-          <p className="text-[14px] font-semibold uppercase tracking-[0.04em] text-[var(--text-default-heading)]">
-            Physics Properties
-          </p>
-          <table className="mt-[var(--s-200)] w-full border-collapse text-[13px]">
-            <tbody>
-              {(
-                [
-                  ["Mass", `${asset.massKg} kg`],
-                  ["Material", asset.materialType],
-                  ["Static Friction", String(asset.physics.frictionStatic)],
-                  ["Dynamic Friction", String(asset.physics.frictionDynamic)],
-                  ["Restitution", String(asset.physics.restitution)],
-                  ["Density", `${asset.densityKgM3} kg/m3`],
-                  ["Collision", asset.collisionLabel],
-                ] as const
-              ).map(([k, v]) => (
-                <tr key={k} className="border-b border-[var(--border-default-secondary)]">
-                  <td className="py-[var(--s-200)] text-[var(--text-default-body)]">{k}</td>
-                  <td className="py-[var(--s-200)] text-right font-mono text-[var(--text-default-heading)]">{v}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="space-y-[var(--s-200)] pt-[var(--s-100)]">
-          <Button
-            variant="primary"
-            className={`w-full ${txBtn}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                alert("Download queued: SimReady USD");
-              })
-            }
-          >
-            {!exportAllowed ? (
-              <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                lock
-              </span>
-            ) : null}
-            Download SimReady USD
-          </Button>
-          <Button
-            variant="secondary"
-            className={`w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] ${txBtn}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                alert("Download queued: GLB");
-              })
-            }
-          >
-            {!exportAllowed ? (
-              <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                lock
-              </span>
-            ) : null}
-            Download GLB
-          </Button>
-          <button
-            type="button"
-            className={`inline-flex w-full items-center justify-center gap-[var(--s-200)] text-center text-[14px] font-medium text-[var(--text-primary-default)] underline underline-offset-4 ${txInteract}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                alert("Metadata JSON — download queued");
-              })
-            }
-          >
-            {!exportAllowed ? (
-              <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                lock
-              </span>
-            ) : null}
-            Download metadata
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { fetchEnvironments, ENVIRONMENT_CATALOG_PLACEHOLDERS } from "@/lib/mockApi";
 import { EnvironmentCatalogCards } from "@/components/environments/EnvironmentCatalogCards";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -7,14 +8,26 @@ import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
+import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 
 const txLink =
   "inline-flex items-center gap-[var(--s-200)] rounded-br100 border border-[var(--border-primary-default)] bg-[var(--surface-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-primary-default)] transition-[color,background-color,border-color,box-shadow] duration-200 hover:bg-[var(--surface-primary-default-subtle)]";
 
 export function EnvironmentLibraryPage() {
   const { accessTier } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const envs = useQuery({ queryKey: ["environments"], queryFn: fetchEnvironments });
   const [requestOpen, setRequestOpen] = useState(false);
+  const [talkTeamOpen, setTalkTeamOpen] = useState(false);
+
+  useEffect(() => {
+    const st = location.state as { openTalkToTeam?: boolean } | null;
+    if (st?.openTalkToTeam) {
+      setTalkTeamOpen(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const catalog =
     envs.data && envs.data.length > 0 ? envs.data : ENVIRONMENT_CATALOG_PLACEHOLDERS;
@@ -48,9 +61,11 @@ export function EnvironmentLibraryPage() {
           accessTier={accessTier}
           showRequestCard
           onRequestCustom={() => setRequestOpen(true)}
+          onLockedEnvironmentClick={() => setTalkTeamOpen(true)}
         />
       )}
       <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
+      <TalkToTeamModal open={talkTeamOpen} onClose={() => setTalkTeamOpen(false)} context="general" />
     </div>
   );
 }

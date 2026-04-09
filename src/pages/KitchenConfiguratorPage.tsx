@@ -18,10 +18,10 @@ const txBtn =
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
   [
-    "inline-flex items-center border-b-2 px-[var(--s-200)] py-[var(--s-200)] text-[13px] font-medium transition-colors",
+    "inline-flex items-center border-b-2 px-[var(--s-200)] py-[var(--s-200)] text-[13px] transition-colors",
     isActive
-      ? "border-[var(--papaya-500)] text-[var(--text-default-heading)]"
-      : "border-transparent text-[var(--text-default-body)] hover:text-[var(--text-default-heading)]",
+      ? "border-[var(--papaya-500)] font-semibold text-[var(--text-default-heading)]"
+      : "border-transparent font-medium text-[var(--text-default-body)] hover:text-[var(--text-default-heading)]",
   ].join(" ");
 
 const labelClass =
@@ -100,7 +100,7 @@ export function KitchenConfiguratorPage() {
         <span className="text-[var(--text-default-placeholder)]" aria-hidden>
           /
         </span>
-        <span className="text-[var(--text-default-heading)]">Configure</span>
+        <span className="text-[var(--text-default-heading)]">Scene</span>
       </nav>
 
       <header className="space-y-[var(--s-300)]">
@@ -114,13 +114,13 @@ export function KitchenConfiguratorPage() {
         <nav className="border-b border-[var(--border-default-secondary)]" aria-label="Kitchen sections">
           <ul className="flex flex-wrap gap-[var(--s-200)]">
             <li>
-              <NavLink to="/environments/kitchen/configure" end className={tabClass}>
-                Configure
+              <NavLink to="/environments/kitchen/scene" end className={tabClass}>
+                Scene
               </NavLink>
             </li>
             <li>
-              <NavLink to="/environments/kitchen/batch" className={tabClass}>
-                Batch Variations
+              <NavLink to="/environments/kitchen/configure" className={tabClass}>
+                Configure
               </NavLink>
             </li>
             <li>

@@ -34,6 +34,11 @@ export interface PropAsset {
   dimensionsMm: { w: number; h: number; d: number };
   /** Density kg/m³ for modal */
   densityKgM3: number;
+  /**
+   * When set, card opens the detail modal and the left pane loads this glTF/GLB for orbit + zoom.
+   * Items without a URL are locked in the library until a preview model is published.
+   */
+  previewModelUrl?: string | null;
 }
 
 export interface MaterialRecord {
@@ -50,6 +55,11 @@ export interface MaterialRecord {
   thumbnailUrl?: string;
   /** When set, card + detail show this instead of the friction line */
   physicsLineOverride?: string;
+  /**
+   * Optional glTF/GLB for interactive preview in the detail modal (same rules as props).
+   * Most materials are 2D swatches until a preview mesh is attached.
+   */
+  previewModelUrl?: string | null;
 }
 
 export interface EnvironmentEntity {

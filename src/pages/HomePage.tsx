@@ -89,28 +89,48 @@ export function HomePage() {
             { name: "Kitchen", href: "/environments/kitchen/configure", img: "/assets/environments/kitchen.jpg", live: true },
             {
               name: "Living Room",
-              href: "/environments/living-room/batch",
+              href: "/environments/living-room/configure",
               img: "/assets/environments/livingroom.png",
               live: false,
             },
-            { name: "Warehouse", href: "/environments/warehouse/batch", img: "/assets/environments/warehouse.png", live: false },
-            { name: "Retail Store", href: "/environments/retail-store/batch", img: "/assets/environments/store.png", live: false },
-          ].map((env) => (
-            <Link key={env.name} to={env.href} className={`${teaserShell} h-[146px]`}>
-              <img
-                src={env.img}
-                alt={env.name}
-                className="absolute inset-0 block h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-black/10" />
-              <div className="absolute left-[var(--s-200)] top-[var(--s-200)]">
-                <span className={`inline-flex h-2.5 w-2.5 rounded-full ${env.live ? "bg-[var(--green-500)]" : "bg-[#eab308]"}`} />
-              </div>
-              <div className="absolute inset-x-[var(--s-200)] bottom-[var(--s-200)] z-[1]">
-                <p className="text-[16px] font-semibold text-white">{env.name}</p>
-              </div>
-            </Link>
-          ))}
+            { name: "Warehouse", href: "/environments/warehouse/configure", img: "/assets/environments/warehouse.png", live: false },
+            { name: "Retail Store", href: "/environments/retail-store/configure", img: "/assets/environments/store.png", live: false },
+          ].map((env) => {
+            const inner = (
+              <>
+                <img
+                  src={env.img}
+                  alt={env.name}
+                  className="absolute inset-0 block h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-black/10" />
+                <div className="absolute left-[var(--s-200)] top-[var(--s-200)]">
+                  <span className={`inline-flex h-2.5 w-2.5 rounded-full ${env.live ? "bg-[var(--green-500)]" : "bg-[#eab308]"}`} />
+                </div>
+                <div className="absolute inset-x-[var(--s-200)] bottom-[var(--s-200)] z-[1]">
+                  <p className="text-[16px] font-semibold text-white">{env.name}</p>
+                </div>
+              </>
+            );
+            if (env.live) {
+              return (
+                <Link key={env.name} to={env.href} className={`${teaserShell} group h-[146px]`}>
+                  {inner}
+                </Link>
+              );
+            }
+            return (
+              <button
+                key={env.name}
+                type="button"
+                title="This environment isn’t available yet — talk to the team"
+                onClick={() => setTalkOpen(true)}
+                className={`${teaserShell} group h-[146px] cursor-pointer text-left ${tx}`}
+              >
+                {inner}
+              </button>
+            );
+          })}
           <button type="button" onClick={() => setTalkOpen(true)} className={`${teaserShell} h-[146px] text-left ${tx}`}>
             <div className="absolute inset-0 flex h-full w-full items-center justify-center bg-[var(--surface-page-secondary)]">
               <span className="material-symbols-outlined text-[34px] text-[var(--text-primary-default)]">add_circle</span>
@@ -166,7 +186,7 @@ export function HomePage() {
 
             <div className="mt-[var(--s-500)] space-y-[var(--s-200)] border-t border-[var(--border-default-secondary)] pt-[var(--s-500)]">
               <Link
-                to="/environments/kitchen/configure"
+                to="/environments/kitchen/scene"
                 className={`flex w-full items-center justify-between rounded-br100 bg-[var(--surface-primary-default)] px-[var(--s-300)] py-[var(--s-300)] text-[15px] font-medium text-[var(--text-on-color-body)] hover:bg-[var(--surface-primary-default-hover)] ${tx}`}
               >
                 <span className="inline-flex items-center gap-[var(--s-200)]">
@@ -181,7 +201,7 @@ export function HomePage() {
               </Link>
               {batchAccess ? (
                 <Link
-                  to="/environments/kitchen/batch"
+                  to="/environments/kitchen/configure"
                   className={`flex w-full items-center justify-between rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] text-[15px] text-[var(--text-default-heading)] hover:bg-[var(--surface-default)] ${tx}`}
                 >
                   <span className="inline-flex items-center gap-[var(--s-200)]">

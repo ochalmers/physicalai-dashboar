@@ -1,24 +1,17 @@
 import { Link, NavLink, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { KitchenConfigureWorkspace } from "@/components/kitchen/KitchenConfigureWorkspace";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
-import { Button } from "@/components/ui/Button";
-import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { BatchGenerationPage } from "@/pages/BatchGenerationPage";
 import { fetchJobs } from "@/lib/mockApi";
-import { useAuth } from "@/context/AuthContext";
-import { canUseFeature, FULL_ACCESS_TOOLTIP } from "@/lib/access";
+import { isLiveEnvironmentWorkspace } from "@/lib/environmentAccess";
 
-const txKitchenPrimary =
-  "inline-flex items-center justify-center gap-[var(--s-200)] rounded-br100 bg-[var(--surface-primary-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-on-color-body)] transition-[background-color] duration-250 ease-out hover:bg-[var(--surface-primary-default-hover)]";
-const txKitchenSecondary =
-  "inline-flex items-center justify-center gap-[var(--s-200)] rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-default-heading)] transition-[background-color] duration-250 ease-out hover:bg-[var(--surface-page-secondary)]";
-
-type WorkspaceTab = "batch" | "api" | "props" | "assets" | "downloads";
+type WorkspaceTab = "configure" | "batch" | "api" | "props" | "assets" | "downloads";
 
 type EnvironmentMeta = {
   slug: string;
@@ -59,8 +52,14 @@ const ENVIRONMENTS: Record<string, EnvironmentMeta> = {
   },
 };
 
-const tabs: { id: WorkspaceTab; label: string }[] = [
+const KITCHEN_TABS: { id: WorkspaceTab; label: string }[] = [
+  { id: "configure", label: "Configure" },
   { id: "batch", label: "Batch Variations" },
+  { id: "api", label: "API" },
+];
+
+const LEGACY_TABS: { id: WorkspaceTab; label: string }[] = [
+  { id: "configure", label: "Configure" },
   { id: "api", label: "API" },
   { id: "props", label: "Props" },
   { id: "assets", label: "Assets" },
@@ -85,11 +84,17 @@ const VARIATION_CARDS = Array.from({ length: 16 }).map((_, idx) => ({
   clutter: idx % 2 === 0 ? "Moderate" : "Dense",
 }));
 
-function WorkspaceNav({ environmentSlug }: { environmentSlug: string }) {
+function WorkspaceNav({
+  environmentSlug,
+  tabList,
+}: {
+  environmentSlug: string;
+  tabList: { id: WorkspaceTab; label: string }[];
+}) {
   return (
-    <nav className="border-b border-[var(--border-default-secondary)]">
+    <nav className="border-b border-[var(--border-default-secondary)]" aria-label="Environment sections">
       <ul className="flex flex-wrap gap-[var(--s-200)]">
-        {tabs.map((tab) => (
+        {tabList.map((tab) => (
           <li key={tab.id}>
             <NavLink
               to={`/environments/${environmentSlug}/${tab.id}`}
@@ -97,7 +102,7 @@ function WorkspaceNav({ environmentSlug }: { environmentSlug: string }) {
                 [
                   "inline-flex items-center border-b-2 px-[var(--s-200)] py-[var(--s-200)] text-[13px] transition-colors",
                   isActive
-                    ? "border-[var(--papaya-500)] font-semibold text-[var(--text-default-heading)]"
+                    ? "border-[var(--papaya-500)] font-semibold text-[var(--text-primary-default)]"
                     : "border-transparent font-medium text-[var(--text-default-body)] hover:text-[var(--text-default-heading)]",
                 ].join(" ")
               }
@@ -239,11 +244,15 @@ function BatchVariationsPanel({ environmentSlug }: { environmentSlug: string }) 
 function WorkspacePanel({ section, environmentSlug }: { section: WorkspaceTab; environmentSlug: string }) {
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: fetchJobs, enabled: section === "downloads" });
 
+  if (section === "configure" && environmentSlug === "kitchen") {
+    return <KitchenConfigureWorkspace />;
+  }
+
   if (section === "batch" && environmentSlug === "kitchen") {
     return <BatchGenerationPage embedded />;
   }
 
-  if (section === "batch") {
+  if (section === "configure") {
     return <BatchVariationsPanel environmentSlug={environmentSlug} />;
   }
 
@@ -366,134 +375,58 @@ function WorkspacePanel({ section, environmentSlug }: { section: WorkspaceTab; e
 export function EnvironmentWorkspacePage() {
   const { environmentSlug, section } = useParams();
   const meta = environmentSlug ? ENVIRONMENTS[environmentSlug] : null;
-  const [talkOpen, setTalkOpen] = useState(false);
-  const { accessTier } = useAuth();
-  const batchAllowed = canUseFeature(accessTier, "batch_submit");
-  const keysWrite = canUseFeature(accessTier, "api_keys_write");
+
+  const tabList = meta?.slug === "kitchen" ? KITCHEN_TABS : LEGACY_TABS;
 
   if (!meta) {
     return <Navigate to="/environments" replace />;
   }
 
-  const activeSection = (section ?? "batch") as WorkspaceTab;
-  if (!tabs.some((t) => t.id === activeSection)) {
-    return <Navigate to={`/environments/${meta.slug}/batch`} replace />;
+  if (!isLiveEnvironmentWorkspace(meta.slug)) {
+    return <Navigate to="/environments" replace state={{ openTalkToTeam: true }} />;
   }
 
-  const gatedShell = meta.status === "live" ? "" : "pointer-events-none select-none";
+  const activeSection = (section ?? "configure") as WorkspaceTab;
+  if (!tabList.some((t) => t.id === activeSection)) {
+    return <Navigate to={`/environments/${meta.slug}/configure`} replace />;
+  }
 
-  /**
-   * Full-access veil must render via `createPortal(document.body)`: `PageTransition` applies
-   * `transform` for route enter animation, which creates a containing block — `position: fixed`
-   * inside the page tree would only cover the max-width content column, not the full main pane.
-   */
-  const fullAccessVeil =
-    meta.status !== "live" && typeof document !== "undefined"
-      ? createPortal(
-          <div
-            className="fixed inset-0 z-[48] flex items-center justify-center bg-[rgba(255,255,255,0.68)] px-[var(--s-300)] backdrop-blur-[10px] sm:px-[var(--s-400)] md:left-[272px]"
-            role="presentation"
-          >
-            <div
-              className="w-full max-w-[430px] rounded-br200 border border-[#ececec] bg-[var(--surface-default)] px-[var(--s-500)] py-[var(--s-500)] shadow-[0_10px_24px_rgba(0,0,0,0.14)]"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="full-access-title"
-            >
-              <h2
-                id="full-access-title"
-                className="text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[var(--text-default-heading)]"
-              >
-                Full Access Required
-              </h2>
-              <p className="mt-[var(--s-300)] text-left text-[15px] leading-[1.55] text-[var(--text-default-body)]">
-                This environment is not available in Explore access.
-              </p>
-              <Button
-                variant="primary"
-                className="mt-[var(--s-400)] h-[42px] w-full rounded-br100 text-[14px] font-semibold"
-                onClick={() => setTalkOpen(true)}
-              >
-                Talk to Team
-              </Button>
-            </div>
-          </div>,
-          document.body
-        )
-      : null;
+  const isKitchen = meta.slug === "kitchen";
 
   return (
     <>
-      <div className="space-y-[var(--s-400)]">
-        <div className={gatedShell}>
-          <section className="relative overflow-hidden rounded-br200 border border-[var(--border-default-secondary)]">
-            <img src={meta.heroImage} alt={`${meta.name}`} className="h-[220px] w-full object-cover md:h-[260px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
-          </section>
-
-          {meta.status === "live" && meta.slug === "kitchen" ? (
-            <>
-              <PageHeader
-                title="Kitchen"
-                description="Generate structured scene variations from the Kitchen environment."
+      <div className="w-full max-w-none space-y-[var(--s-400)] lg:max-w-[1400px]">
+        {isKitchen ? (
+          <header className="border-b border-[var(--border-default-secondary)] pb-[var(--s-400)]">
+            <div className="flex items-start gap-[var(--s-300)]">
+              <Link
+                to="/environments"
+                className={`mt-[2px] flex h-10 w-10 shrink-0 items-center justify-center rounded-br200 text-[var(--text-default-body)] hover:bg-[var(--surface-page-secondary)] hover:text-[var(--text-default-heading)]`}
+                aria-label="Back to environments"
+              >
+                <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+              </Link>
+              <img
+                src={meta.heroImage}
+                alt=""
+                className="h-14 w-[4.5rem] shrink-0 rounded-br200 object-cover"
               />
-              <div className="rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-300)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-none">
-                <div className="flex flex-wrap gap-[var(--s-200)]">
-                  <Link to="/environments/kitchen/configure" className={txKitchenPrimary}>
-                    Configure Environment
-                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                      arrow_forward
-                    </span>
-                  </Link>
-                  {batchAllowed ? (
-                    <Link to={`/environments/${meta.slug}/batch`} className={txKitchenSecondary}>
-                      Batch Variations
-                      <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                        arrow_forward
-                      </span>
-                    </Link>
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      className="border-dashed border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] text-[var(--text-default-heading)]"
-                      disabled
-                      title={FULL_ACCESS_TOOLTIP}
-                      type="button"
-                    >
-                      Batch Variations
-                      <span className="material-symbols-outlined text-[18px] text-[var(--text-default-placeholder)]" aria-hidden>
-                        lock
-                      </span>
-                    </Button>
-                  )}
-                  {keysWrite ? (
-                    <Link to="/api" className={txKitchenSecondary}>
-                      API Documentation
-                      <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                        arrow_forward
-                      </span>
-                    </Link>
-                  ) : (
-                    <Button
-                      variant="secondary"
-                      className="border-dashed border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] text-[var(--text-default-heading)]"
-                      disabled
-                      title={FULL_ACCESS_TOOLTIP}
-                      type="button"
-                    >
-                      API Documentation
-                      <span className="material-symbols-outlined text-[18px] text-[var(--text-default-placeholder)]" aria-hidden>
-                        lock
-                      </span>
-                    </Button>
-                  )}
-                </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold leading-tight text-[var(--text-default-heading)]">
+                  {meta.name}
+                </h1>
+                <p className="mt-[var(--s-200)] text-[13px] leading-snug text-[var(--text-default-body)]">
+                  35 physics-ready models · 18 articulated assets · 24+ joints
+                </p>
               </div>
-              <p className="text-[13px] leading-[20px] text-[var(--text-default-body)]">
-                Select parameter ranges to preview valid combinations. Running batch jobs requires full access.
-              </p>
-            </>
-          ) : (
+            </div>
+          </header>
+        ) : (
+          <>
+            <section className="relative overflow-hidden rounded-br200 border border-[var(--border-default-secondary)]">
+              <img src={meta.heroImage} alt={`${meta.name}`} className="h-[220px] w-full object-cover md:h-[260px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
+            </section>
             <PageHeader
               title={
                 <span className="inline-flex items-center gap-[var(--s-200)]">
@@ -503,13 +436,21 @@ export function EnvironmentWorkspacePage() {
               }
               description={meta.status === "live" ? "Configure parameters, run batch jobs, and manage asset libraries and downloads." : undefined}
             />
-          )}
-          <WorkspaceNav environmentSlug={meta.slug} />
+          </>
+        )}
+
+        <WorkspaceNav environmentSlug={meta.slug} tabList={tabList} />
+
+        <div
+          className={
+            isKitchen && activeSection === "configure"
+              ? "min-h-[min(640px,calc(100dvh-13rem))] w-full pt-[var(--s-200)]"
+              : "min-h-[min(560px,calc(100dvh-20rem))] w-full pt-[var(--s-200)]"
+          }
+        >
           <WorkspacePanel section={activeSection} environmentSlug={meta.slug} />
         </div>
       </div>
-      {fullAccessVeil}
-      <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
     </>
   );
 }
