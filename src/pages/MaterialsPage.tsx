@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { fetchMaterialById, fetchMaterials } from "@/lib/mockApi";
 import { AssetLibraryTabs } from "@/components/assets/AssetLibraryTabs";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { ExportAccessModal } from "@/components/access/ExportAccessModal";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { EmptyState } from "@/components/system/EmptyState";
@@ -84,7 +85,8 @@ export function MaterialsPage() {
   const selected = detail.data ?? null;
 
   return (
-    <div className="space-y-[var(--s-400)]">
+    <>
+    <StaggerFadeGroup staggerMs={100} className="flex flex-col gap-[var(--s-400)]">
       <AssetLibraryTabs />
 
       <PageHeader
@@ -169,12 +171,16 @@ export function MaterialsPage() {
           description="Try clearing search or type filters to see the full library."
         />
       ) : (
-        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <StaggerFadeGroup
+          staggerMs={150}
+          className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
           {list.data?.map((m) => (
             <MaterialCard key={m.id} material={m} onOpen={() => setSelectedId(m.id)} />
           ))}
-        </div>
+        </StaggerFadeGroup>
       )}
+    </StaggerFadeGroup>
 
       <CenterModal
         open={Boolean(selectedId)}
@@ -199,7 +205,7 @@ export function MaterialsPage() {
 
       <ExportAccessModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
       <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
-    </div>
+    </>
   );
 }
 

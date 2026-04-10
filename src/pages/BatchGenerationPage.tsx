@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { defaultKitchenValues, KITCHEN_PARAMETER_GROUPS } from "@/kitchen/params";
 import type { KitchenParamKey } from "@/kitchen/params";
 import { fetchJobs, runBatchJob } from "@/lib/mockApi";
+import { KITCHEN_LIMITS, remaining, tryConsume } from "@/lib/kitchenLimits";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PreviewModeBadge } from "@/components/kitchen/PreviewModeBadge";
@@ -79,6 +80,7 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
   });
 
   const rawCount = useMemo(() => combinationCount(selections), [selections]);
+  const batchLeft = remaining("batchRuns");
   const brokenRules = useMemo(
     () => PREVIEW_RULES.filter((r) => r.test(selections)).map((r) => r.message),
     [selections],
@@ -112,7 +114,7 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
             <PreviewModeBadge title={FULL_ACCESS_TOOLTIP} />
           ) : null
         }
-        description="Select environment and parameter ranges, validate rules, then queue variation jobs."
+        description="Pick parameter ranges to define combinations. The system checks layout rules before you queue runs."
       />
     );
 
@@ -125,7 +127,7 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
           Batch setup
         </h2>
         <p className="text-[13px] text-[var(--text-default-body)]">
-          Choose one or more values in each group to define your variation set.
+          Each selected value multiplies with the others. Invalid combinations are flagged before you run a batch.
         </p>
         <div className="grid gap-[var(--s-400)] lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-[var(--s-300)]">
@@ -184,17 +186,25 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
               <Card className="mt-[var(--s-300)]">
                 <dl className="space-y-[var(--s-200)] text-[13px]">
                   <div className="flex justify-between gap-[var(--s-400)]">
-                    <dt className="text-[var(--text-default-body)]">Total combinations</dt>
+                    <dt className="text-[var(--text-default-body)]">Combinations</dt>
                     <dd className="font-mono text-[var(--text-default-heading)]">{rawCount.toLocaleString()}</dd>
                   </div>
+                  {batchAllowed ? (
+                    <div className="flex justify-between gap-[var(--s-400)]">
+                      <dt className="text-[var(--text-default-body)]">Batch runs left</dt>
+                      <dd className="font-mono text-[var(--text-default-heading)]">
+                        {batchLeft} / {KITCHEN_LIMITS.batchRuns}
+                      </dd>
+                    </div>
+                  ) : null}
                   <div className="flex justify-between gap-[var(--s-400)]">
-                    <dt className="text-[var(--text-default-body)]">Validation</dt>
+                    <dt className="text-[var(--text-default-body)]">Rule check</dt>
                     <dd
                       className={
                         brokenRules.length ? "text-[var(--text-error-default)]" : "text-[var(--text-success-default)]"
                       }
                     >
-                      {brokenRules.length ? "blocked" : "pass"}
+                      {brokenRules.length ? "Invalid setup" : "Valid"}
                     </dd>
                   </div>
                 </dl>
@@ -203,7 +213,7 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
                     Calculation method
                   </p>
                   <p className="mt-[var(--s-200)] text-[12px] leading-[18px] text-[var(--text-default-body)]">
-                    Combinations are calculated from the selected values across each parameter group.
+                    Multiply selections across Layout, Style, and Appliances. Constraints such as clearance rules can mark a setup invalid even when the count is non-zero.
                   </p>
                 </div>
                 {brokenRules.length ? (
@@ -224,10 +234,10 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
                 {!batchAllowed ? (
                   <>
                     <p className="text-[13px] leading-[20px] text-[var(--text-default-body)]">
-                      You can configure variations and review combinations in Explore access.
+                      You can explore parameter combinations and validation here. Executing a batch requires full access.
                     </p>
-                    <p className="mt-[var(--s-200)] text-[13px] leading-[20px] text-[var(--text-default-body)]">
-                      Running batch jobs requires full access.
+                    <p className="mt-[var(--s-200)] text-[13px] font-medium leading-[20px] text-[var(--text-default-heading)]">
+                      Batch generation requires full access
                     </p>
                     <div className="mt-[var(--s-400)] flex flex-col gap-[var(--s-300)]">
                       <Button variant="primary" type="button" className="w-full justify-center" onClick={() => setTalkOpen(true)}>
@@ -249,8 +259,12 @@ export function BatchGenerationPage({ embedded = false }: BatchGenerationPagePro
                     <Button
                       variant="primary"
                       className="inline-flex w-full items-center justify-center gap-[var(--s-200)]"
-                      disabled={mutation.isPending || Boolean(brokenRules.length)}
+                      disabled={mutation.isPending || Boolean(brokenRules.length) || batchLeft === 0}
                       onClick={() => {
+                        if (!tryConsume("batchRuns")) {
+                          setTalkOpen(true);
+                          return;
+                        }
                         mutation.reset();
                         mutation.mutate();
                       }}

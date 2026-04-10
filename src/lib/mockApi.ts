@@ -25,9 +25,8 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     lastGeneratedAt: new Date(Date.now() - 3600_000).toISOString(),
     status: "active",
     catalogIcon: "kitchen",
-    catalogEyebrow: "35 physics-ready models, 18 articulated assets, 35 joints",
-    catalogDescription:
-      "Configure, generate variations, and download SimReady USD scenes.",
+    catalogEyebrow: "Interactive workspace",
+    catalogDescription: "Configure layouts, run batches, and download simulation-ready outputs.",
     catalogThumbnailUrl: "/assets/environments/kitchen.jpg",
   },
   {
@@ -37,8 +36,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     totalCombinations: 420_000,
     lastGeneratedAt: "",
     status: "soon",
-    catalogDescription:
-      "Residential layouts with furniture, lighting, and clutter for embodied navigation and manipulation.",
+    catalogDescription: "This environment is available as part of the full platform.",
     catalogThumbnailUrl: "/assets/environments/livingroom.png",
   },
   {
@@ -48,8 +46,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     totalCombinations: 890_000,
     lastGeneratedAt: "",
     status: "soon",
-    catalogDescription:
-      "Industrial shelving, pallets, and forklifts for logistics and pick-and-place training.",
+    catalogDescription: "This environment is available as part of the full platform.",
     catalogThumbnailUrl: "/assets/environments/warehouse.png",
   },
   {
@@ -59,8 +56,7 @@ export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
     totalCombinations: 310_000,
     lastGeneratedAt: "",
     status: "soon",
-    catalogDescription:
-      "Aisles, checkout lanes, and stockrooms for retail navigation and customer scenarios.",
+    catalogDescription: "This environment is available as part of the full platform.",
     catalogThumbnailUrl: "/assets/environments/store.png",
   },
 ];

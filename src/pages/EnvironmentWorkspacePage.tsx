@@ -3,15 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { KitchenConfigureWorkspace } from "@/components/kitchen/KitchenConfigureWorkspace";
+import { AssetModelViewer } from "@/components/assets/AssetModelViewer";
+import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { BatchGenerationPage } from "@/pages/BatchGenerationPage";
 import { fetchJobs } from "@/lib/mockApi";
-import { isLiveEnvironmentWorkspace } from "@/lib/environmentAccess";
+import { isLiveEnvironmentWorkspace, isLockedEnvironmentWorkspace } from "@/lib/environmentAccess";
 
-type WorkspaceTab = "configure" | "batch" | "api" | "props" | "assets" | "downloads";
+type WorkspaceTab = "configure" | "batch" | "props" | "assets" | "downloads";
 
 type EnvironmentMeta = {
   slug: string;
@@ -55,12 +57,11 @@ const ENVIRONMENTS: Record<string, EnvironmentMeta> = {
 const KITCHEN_TABS: { id: WorkspaceTab; label: string }[] = [
   { id: "configure", label: "Configure" },
   { id: "batch", label: "Batch Variations" },
-  { id: "api", label: "API" },
+  { id: "downloads", label: "Downloads" },
 ];
 
 const LEGACY_TABS: { id: WorkspaceTab; label: string }[] = [
   { id: "configure", label: "Configure" },
-  { id: "api", label: "API" },
   { id: "props", label: "Props" },
   { id: "assets", label: "Assets" },
   { id: "downloads", label: "Downloads" },
@@ -256,23 +257,6 @@ function WorkspacePanel({ section, environmentSlug }: { section: WorkspaceTab; e
     return <BatchVariationsPanel environmentSlug={environmentSlug} />;
   }
 
-  if (section === "api") {
-    return (
-      <Card title="API">
-        <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">
-          Manage API keys and integration references for this environment workflow.
-        </p>
-        <Link
-          to="/api"
-          className="mt-[var(--s-300)] inline-flex items-center gap-[var(--s-200)] text-[14px] font-medium text-[var(--text-primary-default)] hover:underline"
-        >
-          Open API docs
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </Link>
-      </Card>
-    );
-  }
-
   if (section === "props") {
     return (
       <Card title="Props library">
@@ -372,6 +356,60 @@ function WorkspacePanel({ section, environmentSlug }: { section: WorkspaceTab; e
   );
 }
 
+function lockedEnvironmentPreviewUrl(slug: string): string {
+  if (slug === "living-room") return "/assets/3d/floor-lamp.glb";
+  if (slug === "warehouse") return "/assets/3d/drawer-base-unit-900mm.glb";
+  if (slug === "retail-store") return "/assets/3d/microwave.glb";
+  return "/assets/3d/dining-table.glb";
+}
+
+function LockedEnvironmentPage({ meta }: { meta: EnvironmentMeta }) {
+  const [talkOpen, setTalkOpen] = useState(false);
+  const modelUrl = lockedEnvironmentPreviewUrl(meta.slug);
+
+  return (
+    <>
+      <div className="w-full max-w-none space-y-[var(--s-500)] lg:max-w-[1400px]">
+        <header className="border-b border-[var(--border-default-secondary)] pb-[var(--s-400)]">
+          <div className="flex items-start gap-[var(--s-300)]">
+            <Link
+              to="/environments"
+              className="mt-[2px] flex h-10 w-10 shrink-0 items-center justify-center rounded-br200 text-[var(--text-default-body)] hover:bg-[var(--surface-page-secondary)] hover:text-[var(--text-default-heading)]"
+              aria-label="Back to environments"
+            >
+              <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+            </Link>
+            <img src={meta.heroImage} alt="" className="h-14 w-[4.5rem] shrink-0 rounded-br200 object-cover" />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold leading-tight text-[var(--text-default-heading)]">
+                {meta.name}
+              </h1>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid gap-[var(--s-500)] lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,1fr)] lg:items-stretch">
+          <div className="relative min-h-[min(440px,52vh)] overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] shadow-[inset_0_0_0_1px_var(--border-default-secondary)]">
+            <AssetModelViewer url={modelUrl} />
+          </div>
+          <div className="flex flex-col justify-center space-y-[var(--s-400)] rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] p-[var(--s-500)]">
+            <h2 className="text-[clamp(1.15rem,1.8vw,1.35rem)] font-semibold leading-snug text-[var(--text-default-heading)]">
+              Full access required
+            </h2>
+            <p className="text-[15px] leading-[24px] text-[var(--text-default-body)]">
+              This environment is available as part of the full platform.
+            </p>
+            <Button variant="primary" type="button" className="w-full justify-center sm:w-auto" onClick={() => setTalkOpen(true)}>
+              Talk to Team
+            </Button>
+          </div>
+        </div>
+      </div>
+      <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
+    </>
+  );
+}
+
 export function EnvironmentWorkspacePage() {
   const { environmentSlug, section } = useParams();
   const meta = environmentSlug ? ENVIRONMENTS[environmentSlug] : null;
@@ -382,8 +420,12 @@ export function EnvironmentWorkspacePage() {
     return <Navigate to="/environments" replace />;
   }
 
+  if (isLockedEnvironmentWorkspace(meta.slug)) {
+    return <LockedEnvironmentPage meta={meta} />;
+  }
+
   if (!isLiveEnvironmentWorkspace(meta.slug)) {
-    return <Navigate to="/environments" replace state={{ openTalkToTeam: true }} />;
+    return <Navigate to="/environments" replace />;
   }
 
   const activeSection = (section ?? "configure") as WorkspaceTab;
@@ -415,9 +457,6 @@ export function EnvironmentWorkspacePage() {
                 <h1 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold leading-tight text-[var(--text-default-heading)]">
                   {meta.name}
                 </h1>
-                <p className="mt-[var(--s-200)] text-[13px] leading-snug text-[var(--text-default-body)]">
-                  35 physics-ready models · 18 articulated assets · 24+ joints
-                </p>
               </div>
             </div>
           </header>

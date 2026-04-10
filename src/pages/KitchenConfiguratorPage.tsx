@@ -4,13 +4,11 @@ import { Link, NavLink } from "react-router-dom";
 import { defaultKitchenValues, KITCHEN_PARAMETER_GROUPS } from "@/kitchen/params";
 import type { KitchenParamKey } from "@/kitchen/params";
 import { generateScene } from "@/lib/mockApi";
+import { KITCHEN_LIMITS, remaining, tryConsume } from "@/lib/kitchenLimits";
 import { KitchenScenePreview } from "@/components/kitchen/KitchenScenePreview";
-import { PreviewModeBadge } from "@/components/kitchen/PreviewModeBadge";
-import { ExportAccessModal } from "@/components/access/ExportAccessModal";
+import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { useAuth } from "@/context/AuthContext";
-import { canUseFeature, FULL_ACCESS_TOOLTIP } from "@/lib/access";
 import type { SceneGenerationResult } from "@/types";
 
 const txBtn =
@@ -37,14 +35,10 @@ function formatIslandLabel(value: string) {
 }
 
 export function KitchenConfiguratorPage() {
-  const { accessTier } = useAuth();
   const [values, setValues] = useState<Record<KitchenParamKey, string>>(defaultKitchenValues);
   const [error, setError] = useState<string | null>(null);
   const [sceneResult, setSceneResult] = useState<SceneGenerationResult | null>(null);
-  const [accessModalOpen, setAccessModalOpen] = useState(false);
-  const [devOpen, setDevOpen] = useState(false);
-
-  const fullExport = canUseFeature(accessTier, "full_export");
+  const [talkOpen, setTalkOpen] = useState(false);
 
   const summary = useMemo(() => {
     const entries = Object.entries(values) as [KitchenParamKey, string][];
@@ -67,14 +61,29 @@ export function KitchenConfiguratorPage() {
     },
   });
 
+  const runGenerate = () => {
+    if (!tryConsume("configChanges")) {
+      setTalkOpen(true);
+      return;
+    }
+    mutation.mutate({});
+  };
+
   const runExport = (kind: "usd" | "package") => {
     if (!sceneResult) return;
+    if (!tryConsume("sceneDownloads")) {
+      setTalkOpen(true);
+      return;
+    }
     alert(
       kind === "usd"
         ? `Download queued: scene.usd\n${sceneResult.sceneId}`
-        : `Export queued: simulation package zip\n${sceneResult.checksum}`,
+        : `Download queued: simulation package zip\n${sceneResult.checksum}`,
     );
   };
+
+  const dlLeft = remaining("sceneDownloads");
+  const cfgLeft = remaining("configChanges");
 
   return (
     <div className="space-y-[var(--s-400)] pb-[var(--s-500)]">
@@ -104,12 +113,9 @@ export function KitchenConfiguratorPage() {
       </nav>
 
       <header className="space-y-[var(--s-300)]">
-        <div className="flex flex-wrap items-center gap-[var(--s-300)]">
-          <h1 className="text-page-title">Kitchen Environment</h1>
-          {!fullExport ? <PreviewModeBadge title={FULL_ACCESS_TOOLTIP} /> : null}
-        </div>
-        <p className="max-w-[52rem] text-[14px] leading-[22px] text-[var(--text-default-body)]">
-          35 physics-ready models · 18 articulated assets · 24+ joints
+        <h1 className="text-page-title">Kitchen Environment</h1>
+        <p className="max-w-[52rem] text-[13px] leading-[20px] text-[var(--text-default-body)]">
+          Limited access includes preview generations and downloads. Higher limits ship with full access.
         </p>
         <nav className="border-b border-[var(--border-default-secondary)]" aria-label="Kitchen sections">
           <ul className="flex flex-wrap gap-[var(--s-200)]">
@@ -124,8 +130,8 @@ export function KitchenConfiguratorPage() {
               </NavLink>
             </li>
             <li>
-              <NavLink to="/environments/kitchen/api" className={tabClass}>
-                API
+              <NavLink to="/environments/kitchen/downloads" className={tabClass}>
+                Downloads
               </NavLink>
             </li>
           </ul>
@@ -172,8 +178,11 @@ export function KitchenConfiguratorPage() {
 
           <Card title="Current configuration">
             <p className="font-mono text-[12px] leading-[18px] text-[var(--text-default-heading)]">{summary}</p>
+            <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">
+              Preview generations remaining: {cfgLeft} / {KITCHEN_LIMITS.configChanges}
+            </p>
             <div className="mt-[var(--s-400)] flex flex-wrap gap-[var(--s-200)]">
-              <Button variant="primary" disabled={mutation.isPending} onClick={() => mutation.mutate({})}>
+              <Button variant="primary" disabled={mutation.isPending} onClick={runGenerate}>
                 {mutation.isPending ? "Generating…" : "Generate preview"}
               </Button>
             </div>
@@ -185,42 +194,24 @@ export function KitchenConfiguratorPage() {
                 Preview ready — scene <span className="font-mono">{sceneResult.sceneId}</span>.
               </p>
             ) : null}
-            <button
-              type="button"
-              onClick={() => setDevOpen((o) => !o)}
-              className="mt-[var(--s-400)] text-[12px] font-medium text-[var(--text-default-body)] underline underline-offset-2"
-            >
-              Developer tools
-            </button>
-            {devOpen ? (
-              <div className="mt-[var(--s-200)] rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] p-[var(--s-300)]">
-                <p className="text-[12px] text-[var(--text-default-body)]">Inject pipeline error (testing)</p>
-                <Button
-                  variant="secondary"
-                  className="mt-[var(--s-200)]"
-                  disabled={mutation.isPending}
-                  onClick={() => mutation.mutate({ fail: true })}
-                >
-                  Simulate failure
-                </Button>
-              </div>
-            ) : null}
           </Card>
 
-          <Card title="Exports">
+          <Card title="Download scene">
             <p className="text-[13px] leading-[18px] text-[var(--text-default-body)]">
-              After a successful preview, download the USD stage or the full package. Requires full access.
+              After a successful preview, download the USD stage or the full simulation package.
+            </p>
+            <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">
+              Scene downloads remaining: {dlLeft} / {KITCHEN_LIMITS.sceneDownloads}
             </p>
             <div className="mt-[var(--s-400)] flex flex-col gap-[var(--s-300)]">
               <Button
                 variant="primary"
                 className={`w-full ${txBtn}`}
                 disabled={!sceneResult}
-                title={!fullExport ? FULL_ACCESS_TOOLTIP : undefined}
-                onClick={() => (fullExport ? runExport("usd") : setAccessModalOpen(true))}
+                onClick={() => runExport("usd")}
               >
                 <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                  {fullExport ? "download" : "lock"}
+                  download
                 </span>
                 Download USD
               </Button>
@@ -228,27 +219,24 @@ export function KitchenConfiguratorPage() {
                 variant="secondary"
                 className={`w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] ${txBtn}`}
                 disabled={!sceneResult}
-                title={!fullExport ? FULL_ACCESS_TOOLTIP : undefined}
-                onClick={() => (fullExport ? runExport("package") : setAccessModalOpen(true))}
+                onClick={() => runExport("package")}
               >
                 <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                  {fullExport ? "archive" : "lock"}
+                  archive
                 </span>
-                Export package
+                Download package
               </Button>
             </div>
             {!sceneResult ? (
               <p className="mt-[var(--s-300)] text-[12px] text-[var(--text-default-body)]">
-                Generate a preview first to enable exports.
+                Generate a preview first to enable downloads.
               </p>
-            ) : !fullExport ? (
-              <p className="mt-[var(--s-300)] text-[12px] text-[var(--text-default-body)]">Requires full access</p>
             ) : null}
           </Card>
         </div>
       </div>
 
-      <ExportAccessModal open={accessModalOpen} onClose={() => setAccessModalOpen(false)} />
+      <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
     </div>
   );
 }

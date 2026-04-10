@@ -14,3 +14,17 @@ export function AssetCardLockOverlay() {
     </div>
   );
 }
+
+/** Shown when a GLB exists but downloads require full access. */
+export function AssetLibraryAccessOverlay() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[2] flex flex-col items-center justify-center gap-[var(--s-100)] bg-black/35 backdrop-blur-[2px]">
+      <span className="material-symbols-outlined text-[28px] text-white" aria-hidden>
+        lock
+      </span>
+      <span className="max-w-[160px] px-[var(--s-200)] text-center text-[11px] font-semibold leading-snug text-white drop-shadow">
+        Available with full access
+      </span>
+    </div>
+  );
+}

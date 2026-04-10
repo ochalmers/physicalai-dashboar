@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { Badge } from "@/components/ui/Badge";
 import type { EnvironmentEntity } from "@/types";
 import type { AccessTier } from "@/lib/access";
@@ -43,7 +44,7 @@ export function EnvironmentCatalogCards({
   void accessTier;
 
   return (
-    <div className="grid gap-[var(--s-400)] sm:grid-cols-2 xl:grid-cols-3">
+    <StaggerFadeGroup staggerMs={150} className="grid gap-[var(--s-400)] sm:grid-cols-2 xl:grid-cols-3">
       {environments.map((e) => {
         const isActive = e.status === "active";
         const title = e.name;
@@ -51,7 +52,7 @@ export function EnvironmentCatalogCards({
           e.catalogDescription ??
           (isActive
             ? "Configure parameters, generate scenes, and export SimReady assets."
-            : "Not available in Explore access.");
+            : "This environment is available as part of the full platform.");
         const eyebrow = e.catalogEyebrow;
         const icon = e.catalogIcon ?? "view_in_ar";
         const thumbnailUrl = e.catalogThumbnailUrl;
@@ -114,21 +115,24 @@ export function EnvironmentCatalogCards({
                       arrow_forward
                     </span>
                   </Link>
-                ) : (
-                  <button
-                    type="button"
-                    className={txPrimaryCta}
-                    onClick={() => onLockedEnvironmentClick?.()}
-                  >
+                ) : onLockedEnvironmentClick ? (
+                  <button type="button" className={txPrimaryCta} onClick={() => onLockedEnvironmentClick()}>
                     Talk to Team
                     <span className="material-symbols-outlined text-[18px]" aria-hidden>
                       arrow_forward
                     </span>
                   </button>
+                ) : (
+                  <Link to={environmentPath(e.id)} className={txPrimaryCta}>
+                    View
+                    <span className="material-symbols-outlined text-[18px]" aria-hidden>
+                      arrow_forward
+                    </span>
+                  </Link>
                 )}
                 {!isActive ? (
                   <p className="mt-[var(--s-200)] text-[12px] text-[var(--text-default-body)]">
-                    Not available in Explore access — contact us for timelines.
+                    Available with full access
                   </p>
                 ) : null}
               </div>
@@ -150,21 +154,21 @@ export function EnvironmentCatalogCards({
             </span>
           </div>
           <div className="flex flex-1 flex-col gap-[var(--s-200)] p-[var(--s-400)]">
-            <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Request a Custom Scene</h2>
+            <h2 className="text-[16px] font-semibold text-[var(--text-default-heading)]">Request New Environment</h2>
             <p className="flex-1 text-[13px] leading-[20px] text-[var(--text-default-body)]">
-              Need a specific environment for your training pipeline? Tell us what you need.
+              Tell us what you need for your simulation or robotics pipeline.
             </p>
             <div className="pt-[var(--s-100)]">
               {onRequestCustom ? (
                 <button type="button" className={txPrimaryCta} onClick={onRequestCustom}>
-                  Submit Request
+                  Talk to Team
                   <span className="material-symbols-outlined text-[18px]" aria-hidden>
                     arrow_forward
                   </span>
                 </button>
               ) : (
                 <Link to={requestCustomHref} className={txPrimaryCta}>
-                  Submit Request
+                  Talk to Team
                   <span className="material-symbols-outlined text-[18px]" aria-hidden>
                     arrow_forward
                   </span>
@@ -174,6 +178,6 @@ export function EnvironmentCatalogCards({
           </div>
         </div>
       ) : null}
-    </div>
+    </StaggerFadeGroup>
   );
 }

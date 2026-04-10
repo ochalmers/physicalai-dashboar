@@ -351,6 +351,7 @@ export const MOCK_PROPS: PropAsset[] = [
     thumbnailUrl: thumb("prop-oven-bi"),
     previewUrls: previews("prop-oven-bi"),
     previewModelUrl: "/assets/3d/oven.glb",
+    libraryLocked: true,
     dimensionsMm: { w: 600, h: 600, d: 550 },
     densityKgM3: 7900,
     physics: {
@@ -497,6 +498,7 @@ export const MOCK_PROPS: PropAsset[] = [
     thumbnailUrl: thumb("prop-dining-table"),
     previewUrls: previews("prop-dining-table"),
     previewModelUrl: "/assets/3d/dining-table.glb",
+    libraryLocked: true,
     dimensionsMm: { w: 2000, h: 760, d: 950 },
     densityKgM3: 650,
     physics: {

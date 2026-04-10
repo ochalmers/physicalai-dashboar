@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { fetchEnvironments, ENVIRONMENT_CATALOG_PLACEHOLDERS } from "@/lib/mockApi";
 import { EnvironmentCatalogCards } from "@/components/environments/EnvironmentCatalogCards";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
@@ -33,10 +34,11 @@ export function EnvironmentLibraryPage() {
     envs.data && envs.data.length > 0 ? envs.data : ENVIRONMENT_CATALOG_PLACEHOLDERS;
 
   return (
-    <div className="space-y-[var(--s-400)]">
+    <>
+    <StaggerFadeGroup staggerMs={100} className="flex flex-col gap-[var(--s-400)]">
       <PageHeader
         title="Environments"
-        description="Parameterized environments. Status reflects availability."
+        description="Pick a space to configure, generate scenes, and pull simulation-ready outputs."
         actions={
           <button type="button" className={txLink} onClick={() => setRequestOpen(true)}>
             Request custom
@@ -64,8 +66,9 @@ export function EnvironmentLibraryPage() {
           onLockedEnvironmentClick={() => setTalkTeamOpen(true)}
         />
       )}
+    </StaggerFadeGroup>
       <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
       <TalkToTeamModal open={talkTeamOpen} onClose={() => setTalkTeamOpen(false)} context="general" />
-    </div>
+    </>
   );
 }

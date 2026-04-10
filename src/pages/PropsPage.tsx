@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { fetchAssets, fetchPropById } from "@/lib/mockApi";
 import { AssetLibraryTabs } from "@/components/assets/AssetLibraryTabs";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { ExportAccessModal } from "@/components/access/ExportAccessModal";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
@@ -13,7 +14,7 @@ import { CenterModal } from "@/components/ui/CenterModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { canUseFeature } from "@/lib/access";
-import { AssetCardLockOverlay } from "@/components/assets/AssetCardLockOverlay";
+import { AssetCardLockOverlay, AssetLibraryAccessOverlay } from "@/components/assets/AssetCardLockOverlay";
 import { PropAssetDetail } from "@/components/assets/PropAssetDetail";
 import { hasPreviewModel } from "@/lib/assetPreview";
 import { propTagHeroWash, propTagPill } from "@/lib/prismSurfaces";
@@ -81,7 +82,8 @@ export function PropsPage() {
   const selected = detail.data ?? null;
 
   return (
-    <div className="space-y-[var(--s-400)]">
+    <>
+    <StaggerFadeGroup staggerMs={100} className="flex flex-col gap-[var(--s-400)]">
       <AssetLibraryTabs />
 
       <PageHeader
@@ -179,12 +181,16 @@ export function PropsPage() {
           <p className="text-[14px] text-[var(--text-default-body)]">No props match filters.</p>
         </Card>
       ) : (
-        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <StaggerFadeGroup
+          staggerMs={150}
+          className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
           {list.data?.map((p) => (
             <PropCard key={p.id} asset={p} onOpen={() => setSelectedId(p.id)} />
           ))}
-        </div>
+        </StaggerFadeGroup>
       )}
+    </StaggerFadeGroup>
 
       <CenterModal
         open={Boolean(selectedId)}
@@ -199,7 +205,7 @@ export function PropsPage() {
         ) : selected ? (
           <PropAssetDetail
             asset={selected}
-            exportAllowed={fullExport}
+            exportAllowed={fullExport && !selected.libraryLocked}
             onGatedExport={() => setExportModalOpen(true)}
           />
         ) : (
@@ -209,7 +215,7 @@ export function PropsPage() {
 
       <ExportAccessModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
       <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
-    </div>
+    </>
   );
 }
 
@@ -241,6 +247,7 @@ function PropCard({ asset, onOpen }: { asset: PropAsset; onOpen: () => void }) {
           className="h-full w-full object-cover object-center"
         />
         {!canOpen ? <AssetCardLockOverlay /> : null}
+        {canOpen && asset.libraryLocked ? <AssetLibraryAccessOverlay /> : null}
       </div>
       <div className="space-y-[var(--s-200)] px-[var(--s-300)] pb-[var(--s-400)] pt-[var(--s-400)]">
         <span className="block text-[16px] font-semibold leading-snug text-[var(--text-default-heading)]">

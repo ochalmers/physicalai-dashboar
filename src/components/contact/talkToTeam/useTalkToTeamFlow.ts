@@ -1,29 +1,39 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { TalkToTeamContext } from "./topics";
 import { TOPICS } from "./topics";
 
 export function useTalkToTeamFlow(open: boolean, context: TalkToTeamContext) {
   const [step, setStep] = useState(0);
-  const [topic, setTopic] = useState<TalkToTeamContext>(context);
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [message, setMessage] = useState("");
+  const [scheduleNote, setScheduleNote] = useState("");
 
   useEffect(() => {
     if (!open) {
       setStep(0);
-      setName("");
+      setFirstName("");
+      setLastName("");
       setEmail("");
       setCompany("");
       setMessage("");
+      setScheduleNote("");
       return;
     }
     setStep(0);
-    setTopic(context);
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setCompany("");
+    setMessage("");
+    setScheduleNote("");
   }, [open, context]);
 
-  const topicLabel = TOPICS.find((t) => t.id === topic)?.label ?? "General";
+  const topicLabel = TOPICS.find((t) => t.id === context)?.label ?? "General";
+
+  const displayName = useMemo(() => `${firstName} ${lastName}`.trim(), [firstName, lastName]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,27 +44,32 @@ export function useTalkToTeamFlow(open: boolean, context: TalkToTeamContext) {
 
   const reset = useCallback(() => {
     setStep(0);
-    setName("");
+    setFirstName("");
+    setLastName("");
     setEmail("");
     setCompany("");
     setMessage("");
-    setTopic(context);
-  }, [context]);
+    setScheduleNote("");
+  }, []);
 
   return {
     step,
     setStep,
-    topic,
-    setTopic,
-    name,
-    setName,
+    topic: context,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
     email,
     setEmail,
     company,
     setCompany,
     message,
     setMessage,
+    scheduleNote,
+    setScheduleNote,
     topicLabel,
+    displayName,
     handleSubmit,
     reset,
   };

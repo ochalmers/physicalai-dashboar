@@ -9,6 +9,7 @@ import { hasPreviewModel } from "@/lib/assetPreview";
 import { assetKindPill } from "@/lib/prismSurfaces";
 import { AssetLibraryTabs } from "@/components/assets/AssetLibraryTabs";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { CenterModal } from "@/components/ui/CenterModal";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -89,7 +90,8 @@ export function AssetsHubPage() {
   ];
 
   return (
-    <div className="space-y-[var(--s-400)]">
+    <>
+    <StaggerFadeGroup staggerMs={100} className="flex flex-col gap-[var(--s-400)]">
       <AssetLibraryTabs />
 
       <PageHeader
@@ -97,7 +99,10 @@ export function AssetsHubPage() {
         description="Browse all physics-ready props and PBR materials with the same card layout used in the dedicated libraries."
       />
 
-      <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <StaggerFadeGroup
+        staggerMs={150}
+        className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
         {allCards.map((item) => {
           const canOpen = hasPreviewModel(item.previewModelUrl);
           return (
@@ -133,7 +138,8 @@ export function AssetsHubPage() {
             </button>
           );
         })}
-      </div>
+      </StaggerFadeGroup>
+    </StaggerFadeGroup>
 
       <CenterModal
         open={Boolean(selected)}
@@ -169,6 +175,6 @@ export function AssetsHubPage() {
       </CenterModal>
 
       <ExportAccessModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
-    </div>
+    </>
   );
 }

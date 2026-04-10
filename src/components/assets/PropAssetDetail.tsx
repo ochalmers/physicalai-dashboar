@@ -1,7 +1,9 @@
 import { AssetDetailPreviewPane } from "@/components/assets/AssetDetailPreviewPane";
+import { Callout } from "@/components/system/Callout";
 import { Button } from "@/components/ui/Button";
 import { propTagPill } from "@/lib/prismSurfaces";
 import { shelfCategory, tagLabel } from "@/lib/propDisplay";
+import { isAssetInWorkspace, recordAssetDownloaded } from "@/lib/workspaceAssetDownloads";
 import type { PropAsset } from "@/types";
 
 const txInteract =
@@ -19,8 +21,11 @@ export function PropAssetDetail({
   exportAllowed: boolean;
   onGatedExport: () => void;
 }) {
+  const downloadOk = exportAllowed;
+  const inWorkspace = isAssetInWorkspace(asset.id);
+
   const run = (fn: () => void) => {
-    if (!exportAllowed) {
+    if (!downloadOk) {
       onGatedExport();
       return;
     }
@@ -37,6 +42,12 @@ export function PropAssetDetail({
       />
 
       <div className="min-w-0 space-y-[var(--s-400)]">
+        {inWorkspace ? (
+          <Callout variant="info" title="In your workspace">
+            This asset is already in your workspace.
+          </Callout>
+        ) : null}
+
         <div>
           <div className="flex flex-wrap items-center gap-[var(--s-200)]">
             <span className={`rounded-br100 px-[var(--s-200)] py-[3px] text-[12px] font-semibold ${propTagPill[asset.tag]}`}>
@@ -98,11 +109,12 @@ export function PropAssetDetail({
             aria-haspopup={!exportAllowed ? "dialog" : undefined}
             onClick={() =>
               run(() => {
+                recordAssetDownloaded(asset.id);
                 alert("Download queued: SimReady USD");
               })
             }
           >
-            {!exportAllowed ? (
+            {!downloadOk ? (
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
                 lock
               </span>
@@ -112,14 +124,15 @@ export function PropAssetDetail({
           <Button
             variant="secondary"
             className={`w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] ${txBtn}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
+            aria-haspopup={!downloadOk ? "dialog" : undefined}
             onClick={() =>
               run(() => {
+                recordAssetDownloaded(asset.id);
                 alert("Download queued: GLB");
               })
             }
           >
-            {!exportAllowed ? (
+            {!downloadOk ? (
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
                 lock
               </span>
@@ -129,14 +142,15 @@ export function PropAssetDetail({
           <button
             type="button"
             className={`inline-flex w-full items-center justify-center gap-[var(--s-200)] text-center text-[14px] font-medium text-[var(--text-primary-default)] underline underline-offset-4 ${txInteract}`}
-            aria-haspopup={!exportAllowed ? "dialog" : undefined}
+            aria-haspopup={!downloadOk ? "dialog" : undefined}
             onClick={() =>
               run(() => {
+                recordAssetDownloaded(asset.id);
                 alert("Metadata JSON — download queued");
               })
             }
           >
-            {!exportAllowed ? (
+            {!downloadOk ? (
               <span className="material-symbols-outlined text-[18px]" aria-hidden>
                 lock
               </span>
