@@ -21,7 +21,7 @@ type TalkToTeamModalProps = {
 export function TalkToTeamModal({ open, onClose, context = "general", layout = "split" }: TalkToTeamModalProps) {
   const flow = useTalkToTeamFlow(open, context);
 
-  const title = flow.step === 3 ? "You’re all set" : "Talk to us";
+  const title = flow.step === 3 ? "You’re all set" : "Book a demo";
 
   const body =
     layout === "grid" ? (

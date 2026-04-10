@@ -32,66 +32,48 @@ function ThinCheckIcon() {
   );
 }
 
-/** Footer brand — swap `/assets/partners/book-demo-footer.png` when provided. */
-function BookDemoFooterBrand() {
-  return (
-    <div className="mt-auto flex max-w-full flex-col gap-[var(--s-300)] pt-[var(--s-600)]">
-      <div className="inline-flex max-w-full rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-300)] py-[var(--s-300)] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
-        <img
-          src="/assets/partners/book-demo-footer.svg"
-          alt="Imagine.io"
-          className="h-[44px] w-auto max-w-[min(100%,260px)] object-contain object-left"
-        />
-      </div>
-      <p className="text-[10px] font-semibold uppercase leading-relaxed tracking-[var(--text-caption-ls)] text-[var(--text-default-placeholder)]">
-        25,000+ products digitized
-      </p>
-    </div>
-  );
-}
+const inputLineClass =
+  "w-full border-0 border-b border-[var(--border-default-secondary)] bg-transparent py-[12px] text-[15px] leading-normal text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)] outline-none transition-[border-color] duration-200 focus:border-[var(--papaya-500)]";
 
-const inputClass =
-  "w-full rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-250)] text-[14px] text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)] outline-none transition-[box-shadow,border-color] duration-200 focus:border-[var(--border-primary-default)] focus:ring-1 focus:ring-[var(--border-primary-default)]";
+const inputAreaClass =
+  "w-full resize-y rounded-br100 border-0 bg-[var(--surface-page-secondary)] px-[var(--s-300)] py-[var(--s-300)] text-[15px] leading-normal text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)] outline-none transition-[box-shadow] duration-200 focus:ring-2 focus:ring-[color-mix(in_srgb,var(--papaya-500)_35%,transparent)]";
 
-/** Reference-style: numbered circles connected by lines; uppercase labels below. */
+/** Book-a-demo reference: DETAILS / SCHEDULE / CONFIRM; grey caps; active step = papaya circle + white index. */
 function FormProgressSteps({ step }: { step: number }) {
-  const labels = ["Details", "Schedule", "Confirm"] as const;
+  const labels = ["DETAILS", "SCHEDULE", "CONFIRM"] as const;
   return (
     <nav aria-label="Form progress" className="w-full">
-      <div className="flex items-center px-[2px]">
-        {labels.map((_, i) => (
-          <Fragment key={labels[i]}>
+      <div className="flex items-start justify-center">
+        {labels.map((label, i) => (
+          <Fragment key={label}>
             {i > 0 ? (
               <div
-                className={`mx-2 h-px min-w-[8px] flex-1 ${step >= i ? "bg-[color-mix(in_srgb,var(--papaya-500)_45%,var(--border-default-secondary))]" : "bg-[var(--border-default-secondary)]"}`}
+                className={`mx-2 mt-4 h-px min-w-[20px] flex-1 max-sm:min-w-[8px] ${
+                  step >= i
+                    ? "bg-[color-mix(in_srgb,var(--papaya-500)_45%,var(--border-default-secondary))]"
+                    : "bg-[var(--border-default-secondary)]"
+                }`}
                 aria-hidden
               />
             ) : null}
-            <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums ${
-                step === i
-                  ? "bg-[var(--surface-primary-default)] text-[var(--text-on-color-body)]"
-                  : step > i
-                    ? "bg-[var(--surface-page-secondary)] text-[var(--text-default-heading)] ring-1 ring-[var(--border-default-secondary)]"
-                    : "bg-[var(--surface-page-secondary)] text-[var(--text-default-placeholder)] ring-1 ring-[var(--border-default-secondary)]"
-              }`}
-              aria-current={step === i ? "step" : undefined}
-            >
-              {i + 1}
+            <div className="flex w-[min(28vw,104px)] shrink-0 flex-col items-center gap-[10px] sm:w-[104px]">
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums ${
+                  step === i
+                    ? "bg-[var(--surface-primary-default)] text-[var(--text-on-color-body)]"
+                    : step > i
+                      ? "bg-[var(--surface-page-secondary)] text-[var(--text-default-heading)] ring-1 ring-[var(--border-default-secondary)]"
+                      : "bg-[var(--surface-default)] text-[var(--text-default-placeholder)] ring-1 ring-[var(--border-default-secondary)]"
+                }`}
+                aria-current={step === i ? "step" : undefined}
+              >
+                {i + 1}
+              </div>
+              <span className="text-center text-[10px] font-bold uppercase leading-tight tracking-[0.1em] text-[var(--text-default-placeholder)]">
+                {label}
+              </span>
             </div>
           </Fragment>
-        ))}
-      </div>
-      <div className="mt-[10px] grid grid-cols-3 gap-1 text-center">
-        {labels.map((label, i) => (
-          <span
-            key={label}
-            className={`text-[10px] font-bold uppercase leading-tight tracking-[0.08em] ${
-              step === i ? "text-[var(--text-default-heading)]" : "text-[var(--text-default-placeholder)]"
-            }`}
-          >
-            {label}
-          </span>
         ))}
       </div>
     </nav>
@@ -129,25 +111,32 @@ function FormFooter({
   onBack,
   showBack,
   primaryFullWidth,
+  withDivider = true,
 }: {
   primaryLabel: string;
   onBack?: () => void;
   showBack?: boolean;
   primaryFullWidth?: boolean;
+  /** Editorial book-demo layout uses open spacing instead of a hairline above the CTA. */
+  withDivider?: boolean;
 }) {
   const fullPrimary = primaryFullWidth || !showBack;
   return (
     <div
-      className={`flex gap-[var(--s-300)] border-t border-[var(--border-default-secondary)] pt-[var(--s-400)] ${
-        showBack ? "flex-col sm:flex-row sm:items-center sm:justify-between" : "flex-col"
-      }`}
+      className={`flex gap-[var(--s-300)] pt-[var(--s-600)] ${
+        withDivider ? "border-t border-[var(--border-default-secondary)]" : ""
+      } ${showBack ? "flex-col sm:flex-row sm:items-center sm:justify-between" : "flex-col"}`}
     >
       {showBack ? (
         <Button variant="secondary" type="button" onClick={onBack} className="order-2 w-full sm:order-1 sm:w-auto">
           Back
         </Button>
       ) : null}
-      <Button variant="primary" type="submit" className={`order-1 ${fullPrimary ? "w-full" : ""}`}>
+      <Button
+        variant="primary"
+        type="submit"
+        className={`order-1 min-h-[48px] text-[15px] font-semibold ${fullPrimary ? "w-full" : ""}`}
+      >
         {primaryLabel}
       </Button>
     </div>
@@ -155,10 +144,11 @@ function FormFooter({
 }
 
 function DetailsFields({ flow }: { flow: Flow }) {
+  const labelClass = "flex flex-col gap-[var(--s-200)] text-[12px] font-medium text-[var(--text-default-body)]";
   return (
-    <div className="space-y-[var(--s-400)]">
-      <div className="grid grid-cols-1 gap-[var(--s-300)] sm:grid-cols-2">
-        <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+    <div className="space-y-[var(--s-500)]">
+      <div className="grid grid-cols-1 gap-x-[var(--s-500)] gap-y-[var(--s-500)] sm:grid-cols-2">
+        <label className={labelClass}>
           First name
           <input
             required
@@ -167,10 +157,10 @@ function DetailsFields({ flow }: { flow: Flow }) {
             onChange={(e) => flow.setFirstName(e.target.value)}
             autoComplete="given-name"
             placeholder="Jane"
-            className={inputClass}
+            className={inputLineClass}
           />
         </label>
-        <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+        <label className={labelClass}>
           Last name
           <input
             required
@@ -179,11 +169,11 @@ function DetailsFields({ flow }: { flow: Flow }) {
             onChange={(e) => flow.setLastName(e.target.value)}
             autoComplete="family-name"
             placeholder="Doe"
-            className={inputClass}
+            className={inputLineClass}
           />
         </label>
       </div>
-      <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+      <label className={labelClass}>
         Work email
         <input
           required
@@ -193,10 +183,10 @@ function DetailsFields({ flow }: { flow: Flow }) {
           onChange={(e) => flow.setEmail(e.target.value)}
           autoComplete="email"
           placeholder="jane@company.com"
-          className={inputClass}
+          className={inputLineClass}
         />
       </label>
-      <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+      <label className={labelClass}>
         Company
         <input
           name="company"
@@ -204,10 +194,10 @@ function DetailsFields({ flow }: { flow: Flow }) {
           onChange={(e) => flow.setCompany(e.target.value)}
           autoComplete="organization"
           placeholder="Acme Robotics"
-          className={inputClass}
+          className={inputLineClass}
         />
       </label>
-      <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+      <label className={labelClass}>
         What are you building?
         <textarea
           required
@@ -216,7 +206,7 @@ function DetailsFields({ flow }: { flow: Flow }) {
           value={flow.message}
           onChange={(e) => flow.setMessage(e.target.value)}
           placeholder="Tell us about your project, timeline, or any specific requirements."
-          className={`${inputClass} min-h-[120px] resize-y`}
+          className={`${inputAreaClass} min-h-[120px]`}
         />
       </label>
     </div>
@@ -225,11 +215,11 @@ function DetailsFields({ flow }: { flow: Flow }) {
 
 function ScheduleFields({ flow }: { flow: Flow }) {
   return (
-    <div className="space-y-[var(--s-400)]">
+    <div className="space-y-[var(--s-500)]">
       <p className="text-[14px] leading-[22px] text-[var(--text-default-body)]">
         We&apos;ll email you a scheduling link after you submit. Add any timezone or availability notes so we can match you faster.
       </p>
-      <label className="flex flex-col gap-[var(--s-100)] text-[13px] font-medium text-[var(--text-default-body)]">
+      <label className="flex flex-col gap-[var(--s-200)] text-[12px] font-medium text-[var(--text-default-body)]">
         Availability or timezone <span className="font-normal text-[var(--text-default-placeholder)]">(optional)</span>
         <textarea
           name="scheduleNote"
@@ -237,7 +227,7 @@ function ScheduleFields({ flow }: { flow: Flow }) {
           value={flow.scheduleNote}
           onChange={(e) => flow.setScheduleNote(e.target.value)}
           placeholder="e.g. PT mornings, EU business hours, or link preferences"
-          className={`${inputClass} min-h-[100px] resize-y`}
+          className={`${inputAreaClass} min-h-[100px]`}
         />
       </label>
     </div>
@@ -292,9 +282,9 @@ export function TalkToTeamOverlaySplit({ flow, onClose }: { flow: Flow; onClose:
 
   return (
     <div className="flex min-h-[min(72vh,640px)] flex-col md:flex-row">
-      <aside className="flex min-h-0 flex-col border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] py-[var(--s-500)] md:w-[min(46%,400px)] md:max-w-[420px] md:border-b-0 md:border-r md:py-[var(--s-600)]">
-        <h2 className="normal-case text-[clamp(1.25rem,2.2vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-default-heading)]">
-          book a demo with our team
+      <aside className="flex min-h-0 flex-col border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] py-[var(--s-600)] md:w-[min(46%,400px)] md:max-w-[420px] md:border-b-0 md:border-r md:pl-[var(--s-600)] md:pr-[var(--s-500)]">
+        <h2 className="text-[clamp(1.25rem,2.2vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-default-heading)]">
+          Book a demo with our experts
         </h2>
         <ul className="mt-[var(--s-500)] space-y-[var(--s-400)] text-[14px] leading-[1.45] text-[var(--text-default-body)]">
           {EXPECT_ITEMS.map((line) => (
@@ -304,19 +294,18 @@ export function TalkToTeamOverlaySplit({ flow, onClose }: { flow: Flow; onClose:
             </li>
           ))}
         </ul>
-        <BookDemoFooterBrand />
       </aside>
 
       <div className="flex flex-1 flex-col border-t border-[var(--border-default-secondary)] md:border-t-0">
-        <div className="border-b border-[var(--border-default-secondary)] px-[var(--s-500)] pb-[var(--s-400)] pt-[var(--s-500)]">
+        <div className="px-[var(--s-500)] pb-[var(--s-400)] pt-[var(--s-500)] md:pl-[var(--s-600)] md:pr-[var(--s-600)]">
           <FormProgressSteps step={flow.step} />
         </div>
-        <div className="flex flex-1 flex-col px-[var(--s-500)] pb-[var(--s-500)] pt-[var(--s-400)]">
+        <div className="flex flex-1 flex-col px-[var(--s-500)] pb-[var(--s-600)] pt-[var(--s-200)] md:pl-[var(--s-600)] md:pr-[var(--s-600)]">
           {flow.step === 0 ? (
             <form className="flex flex-1 flex-col" onSubmit={flow.handleSubmit}>
               <DetailsFields flow={flow} />
-              <div className="mt-auto pt-[var(--s-500)]">
-                <FormFooter primaryLabel="Next: Pick a Time" primaryFullWidth />
+              <div className="mt-auto">
+                <FormFooter primaryLabel="Pick a time" primaryFullWidth withDivider={false} />
               </div>
             </form>
           ) : null}
@@ -324,8 +313,14 @@ export function TalkToTeamOverlaySplit({ flow, onClose }: { flow: Flow; onClose:
           {flow.step === 1 ? (
             <form className="flex flex-1 flex-col" onSubmit={flow.handleSubmit}>
               <ScheduleFields flow={flow} />
-              <div className="mt-auto pt-[var(--s-500)]">
-                <FormFooter primaryLabel="Next: Confirm" showBack onBack={() => flow.setStep(0)} primaryFullWidth />
+              <div className="mt-auto">
+                <FormFooter
+                  primaryLabel="Next: Confirm"
+                  showBack
+                  onBack={() => flow.setStep(0)}
+                  primaryFullWidth
+                  withDivider={false}
+                />
               </div>
             </form>
           ) : null}
@@ -333,8 +328,8 @@ export function TalkToTeamOverlaySplit({ flow, onClose }: { flow: Flow; onClose:
           {flow.step === 2 ? (
             <form className="flex flex-1 flex-col" onSubmit={flow.handleSubmit}>
               <ConfirmSummary flow={flow} />
-              <div className="mt-auto pt-[var(--s-500)]">
-                <FormFooter primaryLabel="Submit request" showBack onBack={() => flow.setStep(1)} />
+              <div className="mt-auto">
+                <FormFooter primaryLabel="Submit request" showBack onBack={() => flow.setStep(1)} withDivider={false} />
               </div>
             </form>
           ) : null}
@@ -355,29 +350,29 @@ export function TalkToTeamOverlayGrid({ flow, onClose }: { flow: Flow; onClose: 
   }
 
   return (
-    <div className="space-y-[var(--s-400)] px-[var(--s-100)]">
-      <div className="rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)] px-[var(--s-400)] py-[var(--s-400)]">
+    <div className="space-y-[var(--s-500)] px-[var(--s-100)]">
+      <div className="py-[var(--s-200)]">
         <FormProgressSteps step={flow.step} />
       </div>
 
       {flow.step === 0 ? (
-        <form className="space-y-[var(--s-400)]" onSubmit={flow.handleSubmit}>
+        <form className="space-y-[var(--s-500)]" onSubmit={flow.handleSubmit}>
           <DetailsFields flow={flow} />
-          <FormFooter primaryLabel="Next: Pick a Time" primaryFullWidth />
+          <FormFooter primaryLabel="Pick a time" primaryFullWidth withDivider={false} />
         </form>
       ) : null}
 
       {flow.step === 1 ? (
-        <form className="space-y-[var(--s-400)]" onSubmit={flow.handleSubmit}>
+        <form className="space-y-[var(--s-500)]" onSubmit={flow.handleSubmit}>
           <ScheduleFields flow={flow} />
-          <FormFooter primaryLabel="Next: Confirm" showBack onBack={() => flow.setStep(0)} primaryFullWidth />
+          <FormFooter primaryLabel="Next: Confirm" showBack onBack={() => flow.setStep(0)} primaryFullWidth withDivider={false} />
         </form>
       ) : null}
 
       {flow.step === 2 ? (
-        <form className="space-y-[var(--s-400)]" onSubmit={flow.handleSubmit}>
+        <form className="space-y-[var(--s-500)]" onSubmit={flow.handleSubmit}>
           <ConfirmSummary flow={flow} />
-          <FormFooter primaryLabel="Submit request" showBack onBack={() => flow.setStep(1)} />
+          <FormFooter primaryLabel="Submit request" showBack onBack={() => flow.setStep(1)} withDivider={false} />
         </form>
       ) : null}
     </div>
@@ -395,27 +390,27 @@ export function TalkToTeamOverlayStepper({ flow, onClose }: { flow: Flow; onClos
   }
 
   return (
-    <div className="space-y-[var(--s-500)]">
+    <div className="space-y-[var(--s-600)]">
       <FormProgressSteps step={flow.step} />
 
       {flow.step === 0 ? (
-        <form className="space-y-[var(--s-400)]" onSubmit={flow.handleSubmit}>
+        <form className="space-y-[var(--s-500)]" onSubmit={flow.handleSubmit}>
           <DetailsFields flow={flow} />
-          <FormFooter primaryLabel="Next: Pick a Time" primaryFullWidth />
+          <FormFooter primaryLabel="Pick a time" primaryFullWidth withDivider={false} />
         </form>
       ) : null}
 
       {flow.step === 1 ? (
-        <form className="space-y-[var(--s-400)]" onSubmit={flow.handleSubmit}>
+        <form className="space-y-[var(--s-500)]" onSubmit={flow.handleSubmit}>
           <ScheduleFields flow={flow} />
-          <FormFooter primaryLabel="Next: Confirm" showBack onBack={() => flow.setStep(0)} primaryFullWidth />
+          <FormFooter primaryLabel="Next: Confirm" showBack onBack={() => flow.setStep(0)} primaryFullWidth withDivider={false} />
         </form>
       ) : null}
 
       {flow.step === 2 ? (
-        <form className="space-y-[var(--s-400)]" onSubmit={flow.handleSubmit}>
+        <form className="space-y-[var(--s-500)]" onSubmit={flow.handleSubmit}>
           <ConfirmSummary flow={flow} />
-          <FormFooter primaryLabel="Submit request" showBack onBack={() => flow.setStep(1)} />
+          <FormFooter primaryLabel="Submit request" showBack onBack={() => flow.setStep(1)} withDivider={false} />
         </form>
       ) : null}
     </div>
