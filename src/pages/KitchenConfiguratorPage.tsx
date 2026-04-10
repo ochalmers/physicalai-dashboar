@@ -39,6 +39,9 @@ export function KitchenConfiguratorPage() {
 
       <header className="space-y-[var(--s-300)]">
         <h1 className="text-page-title">Kitchen Environment</h1>
+        <p className="text-[13px] leading-snug text-[var(--text-default-body)]">
+          35 physics-ready models · 18 articulated assets · 24+ joints
+        </p>
         <p className="max-w-[52rem] text-[13px] leading-[20px] text-[var(--text-default-body)]">
           Configure the scene, generate previews, and export simulation-ready outputs. Limited access includes capped generations and downloads.
         </p>

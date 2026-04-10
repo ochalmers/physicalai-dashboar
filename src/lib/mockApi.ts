@@ -13,7 +13,8 @@ import type {
 
 import { MOCK_MATERIALS, MOCK_PROPS } from "@/data/mockCatalog";
 import { ENVIRONMENT_CATALOG_PLACEHOLDERS } from "@/data/environmentCatalog";
-import { getBrokenBatchRulesFromRequest } from "@/kitchen/params";
+import { fillBatchSelections } from "@/kitchen/params";
+import { getBatchCombinationStats } from "@/kitchen/batchCombinatorics";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -198,13 +199,10 @@ export async function generateScene(
 
 export async function runBatchJob(req: BatchJobRequest): Promise<BatchJobResult> {
   await delay(700);
-  const invalidRules = getBrokenBatchRulesFromRequest(req.selections);
-  let product = 1;
-  for (const vals of Object.values(req.selections)) {
-    const c = vals.length;
-    product *= Math.max(1, c);
-  }
-  const validCombinations = invalidRules.length ? 0 : product;
+  const normalized = fillBatchSelections(req.selections as Record<string, string[] | undefined>);
+  const stats = getBatchCombinationStats(normalized);
+  const invalidRules = stats.valid === 0 ? ["NO_VALID_COMBINATIONS"] : [];
+  const validCombinations = stats.valid;
   const jobId = `job_${Math.random().toString(36).slice(2, 10)}`;
   const job: GenerationJob = {
     id: jobId,

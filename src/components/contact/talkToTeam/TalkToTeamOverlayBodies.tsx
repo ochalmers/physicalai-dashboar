@@ -32,23 +32,20 @@ function ThinCheckIcon() {
   );
 }
 
-/** Partner badge — stylized mark + wordmark (no bundled NVIDIA artwork). */
-function NvidiaInceptionBadge() {
+/** Footer brand — swap `/assets/partners/book-demo-footer.png` when provided. */
+function BookDemoFooterBrand() {
   return (
-    <div className="inline-flex max-w-full items-stretch gap-[var(--s-300)] rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-300)] py-[var(--s-250)] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
-      <div className="flex w-[52px] shrink-0 items-center justify-center rounded-br100 border border-black/[0.12] bg-white">
-        <svg viewBox="0 0 40 28" className="h-7 w-9" aria-hidden>
-          <title>NVIDIA</title>
-          <rect x="4" y="4" width="5" height="20" rx="0.5" fill="#76B900" />
-          <rect x="13" y="8" width="5" height="16" rx="0.5" fill="#76B900" />
-          <rect x="22" y="6" width="5" height="18" rx="0.5" fill="#76B900" />
-          <rect x="31" y="10" width="5" height="14" rx="0.5" fill="#76B900" />
-        </svg>
+    <div className="mt-auto flex max-w-full flex-col gap-[var(--s-300)] pt-[var(--s-600)]">
+      <div className="inline-flex max-w-full rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-300)] py-[var(--s-300)] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
+        <img
+          src="/assets/partners/book-demo-footer.svg"
+          alt="Imagine.io"
+          className="h-[44px] w-auto max-w-[min(100%,260px)] object-contain object-left"
+        />
       </div>
-      <div className="flex min-w-0 flex-col justify-center py-[2px]">
-        <p className="text-[12px] font-bold leading-none tracking-[-0.02em] text-[var(--text-default-heading)]">NVIDIA</p>
-        <p className="mt-[6px] text-[10px] font-medium leading-snug text-[var(--text-default-body)]">Inception Program</p>
-      </div>
+      <p className="text-[10px] font-semibold uppercase leading-relaxed tracking-[var(--text-caption-ls)] text-[var(--text-default-placeholder)]">
+        25,000+ products digitized
+      </p>
     </div>
   );
 }
@@ -296,8 +293,8 @@ export function TalkToTeamOverlaySplit({ flow, onClose }: { flow: Flow; onClose:
   return (
     <div className="flex min-h-[min(72vh,640px)] flex-col md:flex-row">
       <aside className="flex min-h-0 flex-col border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-500)] py-[var(--s-500)] md:w-[min(46%,400px)] md:max-w-[420px] md:border-b-0 md:border-r md:py-[var(--s-600)]">
-        <h2 className="text-[clamp(1.25rem,2.2vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-default-heading)]">
-          What to expect
+        <h2 className="normal-case text-[clamp(1.25rem,2.2vw,1.5rem)] font-semibold leading-tight tracking-[-0.02em] text-[var(--text-default-heading)]">
+          book a demo with our team
         </h2>
         <ul className="mt-[var(--s-500)] space-y-[var(--s-400)] text-[14px] leading-[1.45] text-[var(--text-default-body)]">
           {EXPECT_ITEMS.map((line) => (
@@ -307,22 +304,14 @@ export function TalkToTeamOverlaySplit({ flow, onClose }: { flow: Flow; onClose:
             </li>
           ))}
         </ul>
-        <div className="mt-auto flex flex-col gap-[var(--s-500)] pt-[var(--s-600)]">
-          <NvidiaInceptionBadge />
-          <p className="text-[10px] font-semibold uppercase leading-relaxed tracking-[var(--text-caption-ls)] text-[var(--text-default-placeholder)]">
-            25,000+ products digitized
-          </p>
-          <div className="hidden md:block">
-            <FormProgressSteps step={flow.step} />
-          </div>
-        </div>
+        <BookDemoFooterBrand />
       </aside>
 
       <div className="flex flex-1 flex-col border-t border-[var(--border-default-secondary)] md:border-t-0">
-        <div className="border-b border-[var(--border-default-secondary)] px-[var(--s-500)] py-[var(--s-300)] md:hidden">
+        <div className="border-b border-[var(--border-default-secondary)] px-[var(--s-500)] pb-[var(--s-400)] pt-[var(--s-500)]">
           <FormProgressSteps step={flow.step} />
         </div>
-        <div className="flex flex-1 flex-col px-[var(--s-500)] py-[var(--s-500)]">
+        <div className="flex flex-1 flex-col px-[var(--s-500)] pb-[var(--s-500)] pt-[var(--s-400)]">
           {flow.step === 0 ? (
             <form className="flex flex-1 flex-col" onSubmit={flow.handleSubmit}>
               <DetailsFields flow={flow} />

@@ -1,8 +1,7 @@
+import { useEffect, useState } from "react";
 import { AssetDetailPreviewPane } from "@/components/assets/AssetDetailPreviewPane";
 import { Callout } from "@/components/system/Callout";
 import { Button } from "@/components/ui/Button";
-import { propTagPill } from "@/lib/prismSurfaces";
-import { shelfCategory, tagLabel } from "@/lib/propDisplay";
 import { isAssetInWorkspace, recordAssetDownloaded } from "@/lib/workspaceAssetDownloads";
 import type { PropAsset } from "@/types";
 
@@ -23,14 +22,11 @@ export function PropAssetDetail({
 }) {
   const downloadOk = exportAllowed;
   const inWorkspace = isAssetInWorkspace(asset.id);
+  const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
 
-  const run = (fn: () => void) => {
-    if (!downloadOk) {
-      onGatedExport();
-      return;
-    }
-    fn();
-  };
+  useEffect(() => {
+    setDownloadMenuOpen(false);
+  }, [asset.id]);
 
   const dims = `${asset.dimensionsMm.w} × ${asset.dimensionsMm.h} × ${asset.dimensionsMm.d} mm`;
   return (
@@ -41,26 +37,14 @@ export function PropAssetDetail({
         alt={asset.name}
       />
 
-      <div className="min-w-0 space-y-[var(--s-400)]">
+      <div className="min-w-0 space-y-[var(--s-500)] px-[var(--s-400)] py-[var(--s-400)] sm:px-[var(--s-600)] sm:py-[var(--s-500)] lg:px-[var(--s-600)] lg:py-[var(--s-600)]">
         {inWorkspace ? (
           <Callout variant="info" title="In your workspace">
             This asset is already in your workspace.
           </Callout>
         ) : null}
 
-        <div>
-          <div className="flex flex-wrap items-center gap-[var(--s-200)]">
-            <span className={`rounded-br100 px-[var(--s-200)] py-[3px] text-[12px] font-semibold ${propTagPill[asset.tag]}`}>
-              {tagLabel(asset.tag)}
-            </span>
-            <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[var(--text-default-placeholder)]">
-              {shelfCategory(asset.category)}
-            </span>
-          </div>
-          <h3 className="mt-[var(--s-100)] text-[34px] font-semibold leading-tight text-[var(--text-default-heading)]">
-            {asset.name}
-          </h3>
-        </div>
+        <h3 className="text-[34px] font-semibold leading-tight text-[var(--text-default-heading)]">{asset.name}</h3>
 
         <div>
           <p className="text-[14px] font-semibold uppercase tracking-[0.04em] text-[var(--text-default-heading)]">
@@ -102,61 +86,70 @@ export function PropAssetDetail({
           </table>
         </div>
 
-        <div className="space-y-[var(--s-200)] pt-[var(--s-100)]">
+        <div className="space-y-[var(--s-300)] pt-[var(--s-200)]">
           <Button
             variant="primary"
             className={`w-full ${txBtn}`}
+            aria-expanded={downloadOk ? downloadMenuOpen : undefined}
             aria-haspopup={!exportAllowed ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                recordAssetDownloaded(asset.id);
-                alert("Download queued: SimReady USD");
-              })
-            }
+            onClick={() => {
+              if (!downloadOk) {
+                onGatedExport();
+                return;
+              }
+              setDownloadMenuOpen((o) => !o);
+            }}
           >
             {!downloadOk ? (
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
                 lock
               </span>
-            ) : null}
-            Download SimReady USD
-          </Button>
-          <Button
-            variant="secondary"
-            className={`w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] ${txBtn}`}
-            aria-haspopup={!downloadOk ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                recordAssetDownloaded(asset.id);
-                alert("Download queued: GLB");
-              })
-            }
-          >
-            {!downloadOk ? (
+            ) : (
               <span className="material-symbols-outlined text-[20px]" aria-hidden>
-                lock
+                {downloadMenuOpen ? "expand_less" : "expand_more"}
               </span>
-            ) : null}
-            Download GLB
+            )}
+            Download
           </Button>
-          <button
-            type="button"
-            className={`inline-flex w-full items-center justify-center gap-[var(--s-200)] text-center text-[14px] font-medium text-[var(--text-primary-default)] underline underline-offset-4 ${txInteract}`}
-            aria-haspopup={!downloadOk ? "dialog" : undefined}
-            onClick={() =>
-              run(() => {
-                recordAssetDownloaded(asset.id);
-                alert("Metadata JSON — download queued");
-              })
-            }
-          >
-            {!downloadOk ? (
-              <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                lock
-              </span>
-            ) : null}
-            Download metadata
-          </button>
+
+          {downloadOk && downloadMenuOpen ? (
+            <div
+              className="flex flex-row flex-wrap items-stretch gap-[var(--s-200)]"
+              role="group"
+              aria-label="Download format options"
+            >
+              <Button
+                variant="secondary"
+                className={`min-h-[44px] min-w-0 flex-1 border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] sm:min-w-[160px] ${txBtn}`}
+                onClick={() => {
+                  recordAssetDownloaded(asset.id);
+                  alert("Download queued: SimReady USD");
+                }}
+              >
+                SimReady USD
+              </Button>
+              <Button
+                variant="secondary"
+                className={`min-h-[44px] min-w-0 flex-1 border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] sm:min-w-[160px] ${txBtn}`}
+                onClick={() => {
+                  recordAssetDownloaded(asset.id);
+                  alert("Download queued: GLB");
+                }}
+              >
+                GLB
+              </Button>
+              <button
+                type="button"
+                className={`inline-flex min-h-[44px] min-w-0 flex-1 items-center justify-center rounded-br100 border border-[var(--border-primary-default)] px-[var(--s-300)] text-[14px] font-medium text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] sm:min-w-[160px] ${txInteract}`}
+                onClick={() => {
+                  recordAssetDownloaded(asset.id);
+                  alert("Metadata JSON — download queued");
+                }}
+              >
+                Metadata
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

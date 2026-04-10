@@ -128,6 +128,17 @@ export const KITCHEN_BATCH_RULES: {
 
 export const KITCHEN_PARAM_KEYS = Object.keys(defaultKitchenValues()) as KitchenParamKey[];
 
+/** Every option selected for each dimension — kitchen batch default. */
+export function allKitchenBatchSelections(): Record<KitchenParamKey, string[]> {
+  const out = {} as Record<KitchenParamKey, string[]>;
+  for (const params of Object.values(KITCHEN_PARAMETER_GROUPS)) {
+    for (const [param, opts] of Object.entries(params)) {
+      out[param as KitchenParamKey] = [...opts];
+    }
+  }
+  return out;
+}
+
 export function fillBatchSelections(sel: Record<string, string[] | undefined>): Record<KitchenParamKey, string[]> {
   const out = {} as Record<KitchenParamKey, string[]>;
   for (const k of KITCHEN_PARAM_KEYS) {

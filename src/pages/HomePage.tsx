@@ -1,11 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ExportAccessModal } from "@/components/access/ExportAccessModal";
+import { MaterialAssetDetail } from "@/components/assets/MaterialAssetDetail";
+import { PropAssetDetail } from "@/components/assets/PropAssetDetail";
 import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
 import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { Badge } from "@/components/ui/Badge";
+import { CenterModal } from "@/components/ui/CenterModal";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useAuth } from "@/context/AuthContext";
+import { canUseFeature } from "@/lib/access";
 import { MOCK_MATERIALS, MOCK_PROPS } from "@/data/mockCatalog";
-import { ENVIRONMENT_CATALOG_PLACEHOLDERS } from "@/lib/mockApi";
+import { ENVIRONMENT_CATALOG_PLACEHOLDERS, fetchMaterialById, fetchPropById } from "@/lib/mockApi";
 import { environmentWorkspaceHref } from "@/lib/environmentWorkspaceHref";
 
 const tx = "transition-[color,background-color,box-shadow,transform] duration-250 ease-out";
@@ -25,12 +33,33 @@ function daypartGreeting() {
   return "Good evening";
 }
 
-const propsShowcase = MOCK_PROPS.slice(0, 5);
-const materialsShowcase = MOCK_MATERIALS.slice(0, 6);
+const HOME_PROPS_COUNT = 5;
+const HOME_MATERIALS_COUNT = 9;
+
+const propsShowcase = MOCK_PROPS.slice(0, HOME_PROPS_COUNT);
+const materialsShowcase = MOCK_MATERIALS.slice(0, HOME_MATERIALS_COUNT);
+
+type HomeAssetSelection = { kind: "prop" | "material"; id: string } | null;
 
 export function HomePage() {
+  const { accessTier } = useAuth();
+  const fullExport = canUseFeature(accessTier, "full_export");
   const [requestOpen, setRequestOpen] = useState(false);
   const [talkOpen, setTalkOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [assetDetail, setAssetDetail] = useState<HomeAssetSelection>(null);
+
+  const propDetailQuery = useQuery({
+    queryKey: ["home", "prop", assetDetail?.id] as const,
+    queryFn: () => fetchPropById(assetDetail!.id),
+    enabled: assetDetail?.kind === "prop",
+  });
+
+  const materialDetailQuery = useQuery({
+    queryKey: ["home", "material", assetDetail?.id] as const,
+    queryFn: () => fetchMaterialById(assetDetail!.id),
+    enabled: assetDetail?.kind === "material",
+  });
 
   const homeEnvironments = useMemo(
     () =>
@@ -40,16 +69,16 @@ export function HomePage() {
 
   return (
     <>
-      <StaggerFadeGroup staggerMs={80} className="flex flex-col gap-[var(--s-600)] pb-[var(--s-600)] pt-[var(--s-100)]">
-        <header>
+      <StaggerFadeGroup staggerMs={80} className="flex flex-col gap-[var(--s-700)] pb-[var(--s-700)] pt-[var(--s-200)]">
+        <header className="px-[var(--s-100)] sm:px-0">
           <h1 className="text-page-title text-[var(--text-default-heading)]">{daypartGreeting()}</h1>
         </header>
 
-        <section className="space-y-[var(--s-400)]" aria-labelledby="home-env-heading">
+        <section className="space-y-[var(--s-500)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-env-heading">
           <h2 id="home-env-heading" className={sectionTitle}>
             Environments
           </h2>
-          <StaggerFadeGroup staggerMs={70} className="grid grid-cols-1 gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-4">
+          <StaggerFadeGroup staggerMs={70} className="grid grid-cols-1 gap-[var(--s-500)] sm:grid-cols-2 lg:grid-cols-4">
             {homeEnvironments.map((env) => {
               const href = environmentWorkspaceHref(env);
               const live = env.status === "active";
@@ -79,7 +108,7 @@ export function HomePage() {
                       )}
                     </div>
                   </div>
-                  <div className="px-[var(--s-200)] pb-[var(--s-300)] pt-[var(--s-300)]">
+                  <div className="px-[var(--s-300)] pb-[var(--s-400)] pt-[var(--s-400)]">
                     <p className="text-[15px] font-semibold leading-tight text-[var(--text-default-heading)]">{env.name}</p>
                   </div>
                 </>
@@ -119,7 +148,7 @@ export function HomePage() {
           </p>
         </section>
 
-        <section className="space-y-[var(--s-400)]" aria-labelledby="home-props-heading">
+        <section className="space-y-[var(--s-500)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-props-heading">
           <div className="flex flex-wrap items-end justify-between gap-[var(--s-300)]">
             <h2 id="home-props-heading" className={sectionTitle}>
               Props
@@ -133,10 +162,15 @@ export function HomePage() {
           </div>
           <StaggerFadeGroup
             staggerMs={60}
-            className="grid w-full grid-cols-2 gap-[var(--s-300)] sm:grid-cols-3 lg:grid-cols-5"
+            className="grid w-full grid-cols-2 gap-[var(--s-400)] sm:grid-cols-3 lg:grid-cols-5"
           >
             {propsShowcase.map((p) => (
-              <Link key={p.id} to="/assets/props" className={`group flex flex-col ${tx}`}>
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setAssetDetail({ kind: "prop", id: p.id })}
+                className={`group flex w-full min-w-0 flex-col rounded-br200 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--papaya-500)] ${tx}`}
+              >
                 <div className="relative aspect-square w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
                   <img
                     src={p.thumbnailUrl}
@@ -144,13 +178,15 @@ export function HomePage() {
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   />
                 </div>
-                <p className="mt-[var(--s-200)] text-left text-[13px] font-medium text-[var(--text-default-heading)]">{p.name}</p>
-              </Link>
+                <p className="mt-[var(--s-300)] text-left text-[13px] font-medium leading-snug text-[var(--text-default-heading)]">
+                  {p.name}
+                </p>
+              </button>
             ))}
           </StaggerFadeGroup>
         </section>
 
-        <section className="space-y-[var(--s-400)]" aria-labelledby="home-mat-heading">
+        <section className="space-y-[var(--s-500)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-mat-heading">
           <div className="flex flex-wrap items-end justify-between gap-[var(--s-300)]">
             <h2 id="home-mat-heading" className={sectionTitle}>
               Materials
@@ -164,10 +200,15 @@ export function HomePage() {
           </div>
           <StaggerFadeGroup
             staggerMs={50}
-            className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,140px),1fr))] gap-[var(--s-300)]"
+            className="grid w-full grid-cols-2 gap-x-[var(--s-300)] gap-y-[var(--s-500)] sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 min-[1280px]:grid-cols-[repeat(9,minmax(0,1fr))] min-[1280px]:gap-[var(--s-400)]"
           >
             {materialsShowcase.map((m) => (
-              <Link key={m.id} to="/assets/materials" className={`group flex flex-col ${tx}`}>
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setAssetDetail({ kind: "material", id: m.id })}
+                className={`group flex w-full min-w-0 flex-col rounded-br200 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--papaya-500)] ${tx}`}
+              >
                 <div className="relative aspect-square w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)]">
                   <img
                     src={m.thumbnailUrl}
@@ -175,13 +216,55 @@ export function HomePage() {
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                   />
                 </div>
-                <p className="mt-[var(--s-200)] text-left text-[13px] font-medium text-[var(--text-default-heading)]">{m.name}</p>
-              </Link>
+                <p className="mt-[var(--s-300)] text-left text-[13px] font-medium leading-snug text-[var(--text-default-heading)]">
+                  {m.name}
+                </p>
+              </button>
             ))}
           </StaggerFadeGroup>
         </section>
       </StaggerFadeGroup>
 
+      <CenterModal
+        open={Boolean(assetDetail)}
+        title={
+          assetDetail?.kind === "prop"
+            ? propDetailQuery.data?.name ?? "Prop"
+            : materialDetailQuery.data?.name ?? "Material"
+        }
+        onClose={() => setAssetDetail(null)}
+        size="2xl"
+        contentAlign="start"
+        hideHeader
+      >
+        {assetDetail?.kind === "prop" ? (
+          propDetailQuery.isLoading ? (
+            <Skeleton className="h-40 w-full" />
+          ) : propDetailQuery.data ? (
+            <PropAssetDetail
+              asset={propDetailQuery.data}
+              exportAllowed={fullExport}
+              onGatedExport={() => setExportModalOpen(true)}
+            />
+          ) : (
+            <p className="text-[14px] text-[var(--text-error-default)]">Prop not found.</p>
+          )
+        ) : assetDetail?.kind === "material" ? (
+          materialDetailQuery.isLoading ? (
+            <Skeleton className="h-40 w-full" />
+          ) : materialDetailQuery.data ? (
+            <MaterialAssetDetail
+              material={materialDetailQuery.data}
+              exportAllowed={fullExport}
+              onGatedExport={() => setExportModalOpen(true)}
+            />
+          ) : (
+            <p className="text-[14px] text-[var(--text-error-default)]">Material not found.</p>
+          )
+        ) : null}
+      </CenterModal>
+
+      <ExportAccessModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
       <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
       <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
     </>

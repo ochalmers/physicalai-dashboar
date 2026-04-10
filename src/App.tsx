@@ -26,7 +26,6 @@ export default function App() {
           <Route path="/assets/props" element={<PropsPage />} />
           <Route path="/assets/materials" element={<MaterialsPage />} />
           <Route path="/environments" element={<EnvironmentLibraryPage />} />
-          <Route path="/environments/kitchen/batch" element={<Navigate to="/environments/kitchen/configure" replace />} />
           <Route path="/environments/kitchen/api" element={<Navigate to="/environments/kitchen/downloads" replace />} />
           <Route path="/environments/kitchen/scene" element={<KitchenConfiguratorPage />} />
           <Route path="/environments/:environmentSlug/:section" element={<EnvironmentWorkspacePage />} />

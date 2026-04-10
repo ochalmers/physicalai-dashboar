@@ -457,6 +457,9 @@ export function EnvironmentWorkspacePage() {
                 <h1 className="text-[clamp(1.25rem,2vw,1.5rem)] font-semibold leading-tight text-[var(--text-default-heading)]">
                   {meta.name}
                 </h1>
+                <p className="mt-[var(--s-200)] text-[13px] leading-snug text-[var(--text-default-body)]">
+                  35 physics-ready models · 18 articulated assets · 24+ joints
+                </p>
               </div>
             </div>
           </header>
