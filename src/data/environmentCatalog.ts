@@ -6,20 +6,6 @@ import type { EnvironmentEntity } from "@/types";
  */
 export const ENVIRONMENT_CATALOG_PLACEHOLDERS: EnvironmentEntity[] = [
   {
-    id: "env-galley-kitchen",
-    name: "Galley Kitchen",
-    parameterCount: 32,
-    totalCombinations: 120_000,
-    lastGeneratedAt: "",
-    status: "soon",
-    catalogCategory: "Kitchen",
-    catalogThumbnailUrl: "/assets/environments/galley-kitchen.jpg",
-    catalogModelsLabel: "32 models",
-    catalogJointsLabel: "12 joints",
-    catalogDescription:
-      "Narrow galley layout optimized for constrained-space manipulation. Fewer models but tighter interaction zones. Good for testing policies in limited workspace scenarios.",
-  },
-  {
     id: "env-open-plan-kitchen",
     name: "Kitchen",
     parameterCount: 86,

@@ -18,8 +18,14 @@ import { environmentWorkspaceHref } from "@/lib/environmentWorkspaceHref";
 
 const tx = "transition-[color,background-color,box-shadow,transform] duration-250 ease-out";
 
-const sectionTitle =
-  "text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-default-heading)]";
+/** Section headings — sentence case, medium weight (reference: editorial home rail). */
+const homeSectionTitle =
+  "text-[17px] font-medium leading-snug tracking-normal text-[var(--text-default-heading)] sm:text-[18px]";
+
+const homeSectionHeaderRow =
+  "flex flex-wrap items-baseline justify-between gap-x-[var(--s-400)] gap-y-[var(--s-200)]";
+
+const homeViewAllLink = `shrink-0 text-[13px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-heading)] ${tx}`;
 
 const envShell =
   "group relative block w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left";
@@ -63,21 +69,29 @@ export function HomePage() {
 
   const homeEnvironments = useMemo(
     () =>
-      ENVIRONMENT_CATALOG_PLACEHOLDERS.filter((e) => e.id !== "env-galley-kitchen").slice(0, HOME_ENV_COUNT),
+      ENVIRONMENT_CATALOG_PLACEHOLDERS.slice(0, HOME_ENV_COUNT),
     [],
   );
 
   return (
     <>
-      <StaggerFadeGroup staggerMs={80} className="flex flex-col gap-[var(--s-700)] pb-[var(--s-700)] pt-[var(--s-200)]">
+      <StaggerFadeGroup
+        staggerMs={80}
+        className="flex flex-col gap-12 pb-[var(--s-800)] pt-[var(--s-200)] sm:gap-14"
+      >
         <header className="px-[var(--s-100)] sm:px-0">
           <h1 className="text-page-title text-[var(--text-default-heading)]">{daypartGreeting()}</h1>
         </header>
 
-        <section className="space-y-[var(--s-500)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-env-heading">
-          <h2 id="home-env-heading" className={sectionTitle}>
-            Environments
-          </h2>
+        <section className="space-y-[var(--s-600)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-env-heading">
+          <div className={homeSectionHeaderRow}>
+            <h2 id="home-env-heading" className={homeSectionTitle}>
+              Environments
+            </h2>
+            <Link to="/environments" className={homeViewAllLink}>
+              View all
+            </Link>
+          </div>
           <StaggerFadeGroup staggerMs={70} className="grid grid-cols-1 gap-[var(--s-500)] sm:grid-cols-2 lg:grid-cols-4">
             {homeEnvironments.map((env) => {
               const href = environmentWorkspaceHref(env);
@@ -96,9 +110,9 @@ export function HomePage() {
                       {live ? (
                         <Badge variant="live">Live</Badge>
                       ) : (
-                        <span className="inline-flex items-center justify-center gap-[4px] rounded-full bg-[#2a2a2a] px-[10px] py-[4px] text-[11px] font-semibold uppercase leading-none tracking-[0.06em] text-[var(--grey-200)]">
+                        <span className="inline-flex items-center gap-[3px] rounded-full bg-[#2a2a2a] px-[8px] py-[3px] text-[11px] font-semibold uppercase leading-none tracking-[0.06em] text-[var(--grey-200)]">
                           <span
-                            className="material-symbols-outlined flex size-[14px] shrink-0 items-center justify-center text-[14px] leading-none"
+                            className="material-symbols-outlined shrink-0 text-[11px] leading-none"
                             aria-hidden
                           >
                             lock
@@ -148,15 +162,12 @@ export function HomePage() {
           </p>
         </section>
 
-        <section className="space-y-[var(--s-500)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-props-heading">
-          <div className="flex flex-wrap items-end justify-between gap-[var(--s-300)]">
-            <h2 id="home-props-heading" className={sectionTitle}>
+        <section className="space-y-[var(--s-600)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-props-heading">
+          <div className={homeSectionHeaderRow}>
+            <h2 id="home-props-heading" className={homeSectionTitle}>
               Props
             </h2>
-            <Link
-              to="/assets/props"
-              className={`text-[13px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-heading)] ${tx}`}
-            >
+            <Link to="/assets/props" className={homeViewAllLink}>
               View all
             </Link>
           </div>
@@ -186,15 +197,12 @@ export function HomePage() {
           </StaggerFadeGroup>
         </section>
 
-        <section className="space-y-[var(--s-500)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-mat-heading">
-          <div className="flex flex-wrap items-end justify-between gap-[var(--s-300)]">
-            <h2 id="home-mat-heading" className={sectionTitle}>
+        <section className="space-y-[var(--s-600)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-mat-heading">
+          <div className={homeSectionHeaderRow}>
+            <h2 id="home-mat-heading" className={homeSectionTitle}>
               Materials
             </h2>
-            <Link
-              to="/assets/materials"
-              className={`text-[13px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-heading)] ${tx}`}
-            >
+            <Link to="/assets/materials" className={homeViewAllLink}>
               View all
             </Link>
           </div>
