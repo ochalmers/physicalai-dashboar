@@ -159,7 +159,6 @@ export function HomePage() {
           </StaggerFadeGroup>
 
           <p className="text-[13px] text-[var(--text-default-body)]">
-            Need another space?{" "}
             <button
               type="button"
               onClick={() => setRequestOpen(true)}
@@ -195,10 +194,6 @@ export function HomePage() {
                     src={p.thumbnailUrl}
                     alt=""
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-black/20 transition-[background-color] duration-300 group-hover:bg-black/35"
-                    aria-hidden
                   />
                 </div>
                 <p className="mt-[var(--s-300)] text-left text-[13px] font-medium leading-snug text-[var(--text-default-heading)]">
