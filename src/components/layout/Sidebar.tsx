@@ -4,7 +4,6 @@ import { tx, txSidebarSlide } from "./motion";
 import { sidebarWidthClass } from "./sidebarLayout";
 import { AskImagineSidebarButton } from "@/components/assistant/AskImagineDock";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
-import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
 import { useAuth } from "@/context/AuthContext";
 import { isLiveEnvironmentWorkspace } from "@/lib/environmentAccess";
 
@@ -74,7 +73,6 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const { user } = useAuth();
   const [assetOpen, setAssetOpen] = useState(false);
   const [envOpen, setEnvOpen] = useState(true);
-  const [requestOpen, setRequestOpen] = useState(false);
   const [talkTeamOpen, setTalkTeamOpen] = useState(false);
 
   useEffect(() => {
@@ -325,7 +323,10 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               })}
               <button
                 type="button"
-                onClick={() => setRequestOpen(true)}
+                onClick={() => {
+                  setTalkTeamOpen(true);
+                  afterNav();
+                }}
                 className={cn(
                   tx,
                   "flex items-center gap-[var(--s-200)] py-[10px] text-left text-[13px] text-[#a3a3a3] max-md:min-h-[44px] max-md:items-center md:py-[6px]",
@@ -420,7 +421,6 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           </Link>
         </div>
       </nav>
-      <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
       <TalkToTeamModal open={talkTeamOpen} onClose={() => setTalkTeamOpen(false)} context="general" />
     </aside>
   );

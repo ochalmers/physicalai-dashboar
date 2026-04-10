@@ -8,7 +8,6 @@ import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { ErrorPanel } from "@/components/system/ErrorPanel";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
-import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 
 const txLink =
@@ -19,7 +18,6 @@ export function EnvironmentLibraryPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const envs = useQuery({ queryKey: ["environments"], queryFn: fetchEnvironments });
-  const [requestOpen, setRequestOpen] = useState(false);
   const [talkTeamOpen, setTalkTeamOpen] = useState(false);
 
   useEffect(() => {
@@ -37,9 +35,9 @@ export function EnvironmentLibraryPage() {
     <>
     <StaggerFadeGroup staggerMs={100} className="flex flex-col gap-[var(--s-400)]">
       <PageHeader
-        title="environments"
+        title="Environments"
         actions={
-          <button type="button" className={txLink} onClick={() => setRequestOpen(true)}>
+          <button type="button" className={txLink} onClick={() => setTalkTeamOpen(true)}>
             Request custom
             <span className="material-symbols-outlined text-[18px]" aria-hidden>
               arrow_forward
@@ -61,12 +59,11 @@ export function EnvironmentLibraryPage() {
           environments={catalog}
           accessTier={accessTier}
           showRequestCard
-          onRequestCustom={() => setRequestOpen(true)}
+          onRequestCustom={() => setTalkTeamOpen(true)}
           onLockedEnvironmentClick={() => setTalkTeamOpen(true)}
         />
       )}
     </StaggerFadeGroup>
-      <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
       <TalkToTeamModal open={talkTeamOpen} onClose={() => setTalkTeamOpen(false)} context="general" />
     </>
   );

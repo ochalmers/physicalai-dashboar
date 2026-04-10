@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ExportAccessModal } from "@/components/access/ExportAccessModal";
 import { MaterialAssetDetail } from "@/components/assets/MaterialAssetDetail";
 import { PropAssetDetail } from "@/components/assets/PropAssetDetail";
-import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
 import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { CenterModal } from "@/components/ui/CenterModal";
@@ -48,10 +47,11 @@ function daypartGreeting() {
   return "Good evening";
 }
 
-const HOME_PROPS_COUNT = 5;
+/** Only props with a bundled GLB — locked SKUs stay off the home rail. */
+const HOME_PROPS_MAX = 5;
 const HOME_MATERIALS_COUNT = 9;
 
-const propsShowcase = MOCK_PROPS.slice(0, HOME_PROPS_COUNT);
+const propsShowcase = MOCK_PROPS.filter((p) => hasPreviewModel(p.previewModelUrl)).slice(0, HOME_PROPS_MAX);
 const materialsShowcase = MOCK_MATERIALS.slice(0, HOME_MATERIALS_COUNT);
 
 type HomeAssetSelection = { kind: "prop" | "material"; id: string } | null;
@@ -59,7 +59,6 @@ type HomeAssetSelection = { kind: "prop" | "material"; id: string } | null;
 export function HomePage() {
   const { accessTier } = useAuth();
   const fullExport = canUseFeature(accessTier, "full_export");
-  const [requestOpen, setRequestOpen] = useState(false);
   const [talkOpen, setTalkOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [assetDetail, setAssetDetail] = useState<HomeAssetSelection>(null);
@@ -164,7 +163,7 @@ export function HomePage() {
           <p className="text-[13px] text-[var(--text-default-body)]">
             <button
               type="button"
-              onClick={() => setRequestOpen(true)}
+              onClick={() => setTalkOpen(true)}
               className="font-medium text-[var(--text-primary-default)] underline underline-offset-2 hover:text-[var(--text-default-heading)]"
             >
               Request an environment
@@ -293,7 +292,6 @@ export function HomePage() {
       </CenterModal>
 
       <ExportAccessModal open={exportModalOpen} onClose={() => setExportModalOpen(false)} />
-      <RequestCustomSceneModal open={requestOpen} onClose={() => setRequestOpen(false)} />
       <TalkToTeamModal open={talkOpen} onClose={() => setTalkOpen(false)} context="general" />
     </>
   );
