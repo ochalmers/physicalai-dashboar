@@ -215,8 +215,8 @@ export function AskImagineSidebarButton() {
       aria-controls={panelId}
       className={cn(
         tx,
-        "group flex w-full min-w-0 items-center gap-[var(--s-200)] rounded-[6px] border border-[#2f2f2f] bg-[rgba(255,255,255,0.04)] px-[var(--s-300)] py-[10px] text-left text-[13px] font-medium leading-[18px] text-[#e8e8e8] max-md:min-h-[44px] max-md:items-center",
-        "hover:border-[#3f3f3f] hover:bg-[rgba(255,255,255,0.07)] hover:text-white",
+        "group flex w-full min-w-0 items-center gap-[var(--s-200)] rounded-[6px] bg-[rgba(255,255,255,0.04)] px-[var(--s-400)] py-[10px] text-left text-[13px] font-medium leading-[18px] text-[#e8e8e8] max-md:min-h-[44px] max-md:items-center",
+        "hover:bg-[rgba(255,255,255,0.07)] hover:text-white",
       )}
     >
       <img src="/logos/Mark.svg" alt="" className="h-5 w-5 shrink-0 opacity-90" />

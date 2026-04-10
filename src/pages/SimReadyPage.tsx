@@ -38,23 +38,29 @@ export function SimReadyPage() {
           </p>
         ) : (
           <form
-            className="mx-auto mt-[var(--s-500)] flex max-w-[760px] flex-col gap-[var(--s-200)] sm:flex-row"
+            className="mx-auto mt-[var(--s-500)] w-full max-w-[420px]"
             onSubmit={(e) => {
               e.preventDefault();
               setSent(true);
             }}
           >
-            <input
-              required
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="h-[62px] flex-1 rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-400)] text-[16px] text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)]"
-            />
-            <Button variant="primary" type="submit" className="h-[62px] px-[var(--s-500)] text-[16px] font-semibold">
-              Join waitlist
-            </Button>
+            <div className="flex flex-col gap-[var(--s-300)] sm:flex-row sm:items-stretch">
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="min-h-[48px] min-w-0 flex-1 rounded-br100 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] px-[var(--s-400)] text-[15px] text-[var(--text-default-heading)] placeholder:text-[var(--text-default-placeholder)] focus:border-[var(--border-primary-default)] focus:outline-none focus:ring-2 focus:ring-[var(--surface-primary-default-subtle)]"
+              />
+              <Button
+                variant="primary"
+                type="submit"
+                className="h-[48px] shrink-0 px-[var(--s-500)] text-[15px] font-semibold sm:min-w-[148px]"
+              >
+                Join waitlist
+              </Button>
+            </div>
           </form>
         )}
 

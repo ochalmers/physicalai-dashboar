@@ -399,7 +399,9 @@ export function Sidebar({ mobileOpen, onClose }: SidebarProps) {
         </NavLink>
 
         <div className="mt-auto flex flex-col gap-[var(--s-300)] border-t border-[#262626] pt-[var(--s-400)]">
-          <AskImagineSidebarButton />
+          <div className="mx-[var(--s-200)] min-w-0">
+            <AskImagineSidebarButton />
+          </div>
           <Link
             to="/account"
             onClick={afterNav}
