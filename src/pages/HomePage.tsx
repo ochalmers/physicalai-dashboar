@@ -26,7 +26,8 @@ const homeSectionTitle =
 const homeSectionHeaderRow =
   "flex flex-wrap items-baseline justify-between gap-x-[var(--s-400)] gap-y-[var(--s-200)]";
 
-const homeViewAllLink = `shrink-0 text-[13px] font-medium text-[var(--text-primary-default)] hover:text-[var(--text-default-heading)] ${tx}`;
+/** Same optical size as section titles; color distinguishes the link. */
+const homeViewAllLink = `shrink-0 text-[17px] font-medium leading-snug tracking-normal sm:text-[18px] text-[var(--text-primary-default)] hover:text-[var(--text-default-heading)] ${tx}`;
 
 const envShell =
   "group relative block w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left";
@@ -85,13 +86,13 @@ export function HomePage() {
     <>
       <StaggerFadeGroup
         staggerMs={80}
-        className="flex flex-col gap-12 pb-[var(--s-800)] pt-[var(--s-200)] sm:gap-14"
+        className="flex flex-col gap-8 pb-[var(--s-800)] pt-[var(--s-600)] sm:gap-10 sm:pt-[var(--s-700)]"
       >
         <header className="px-[var(--s-100)] sm:px-0">
           <h1 className="text-page-title text-[var(--text-default-heading)]">{daypartGreeting()}</h1>
         </header>
 
-        <section className="space-y-[var(--s-600)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-env-heading">
+        <section className="space-y-[var(--s-300)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-env-heading">
           <div className={homeSectionHeaderRow}>
             <h2 id="home-env-heading" className={homeSectionTitle}>
               Environments
@@ -171,7 +172,7 @@ export function HomePage() {
           </p>
         </section>
 
-        <section className="space-y-[var(--s-600)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-props-heading">
+        <section className="space-y-[var(--s-300)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-props-heading">
           <div className={homeSectionHeaderRow}>
             <h2 id="home-props-heading" className={homeSectionTitle}>
               Props
@@ -216,7 +217,7 @@ export function HomePage() {
           </StaggerFadeGroup>
         </section>
 
-        <section className="space-y-[var(--s-600)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-mat-heading">
+        <section className="space-y-[var(--s-300)] px-[var(--s-100)] sm:px-0" aria-labelledby="home-mat-heading">
           <div className={homeSectionHeaderRow}>
             <h2 id="home-mat-heading" className={homeSectionTitle}>
               Materials
