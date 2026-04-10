@@ -26,7 +26,7 @@ export function MaterialAssetDetail({
   return (
     <div className="grid min-h-0 items-stretch gap-[var(--s-500)] lg:grid-cols-[minmax(420px,1.5fr)_minmax(300px,400px)]">
       <AssetDetailPreviewPane
-        previewModelUrl={material.previewModelUrl}
+        previewModelUrl={null}
         thumbnailUrl={material.thumbnailUrl}
         alt={material.name}
       />

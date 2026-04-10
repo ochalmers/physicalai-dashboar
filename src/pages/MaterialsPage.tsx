@@ -15,9 +15,7 @@ import { CenterModal } from "@/components/ui/CenterModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { canUseFeature } from "@/lib/access";
-import { AssetCardLockOverlay } from "@/components/assets/AssetCardLockOverlay";
 import { MaterialAssetDetail } from "@/components/assets/MaterialAssetDetail";
-import { hasPreviewModel } from "@/lib/assetPreview";
 import { categoryLabel } from "@/lib/materialDisplay";
 import { materialTypeWash } from "@/lib/prismSurfaces";
 import type { MaterialRecord } from "@/types";
@@ -160,9 +158,9 @@ export function MaterialsPage() {
       {list.isError ? (
         <ErrorPanel message="Materials couldn’t be loaded." onRetry={() => list.refetch()} />
       ) : list.isLoading ? (
-        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-[var(--s-300)]">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-56" />
+            <Skeleton key={i} className="h-56 w-full min-w-0" />
           ))}
         </div>
       ) : list.data?.length === 0 ? (
@@ -173,7 +171,7 @@ export function MaterialsPage() {
       ) : (
         <StaggerFadeGroup
           staggerMs={150}
-          className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-[var(--s-300)]"
         >
           {list.data?.map((m) => (
             <MaterialCard key={m.id} material={m} onOpen={() => setSelectedId(m.id)} />
@@ -211,18 +209,11 @@ export function MaterialsPage() {
 
 function MaterialCard({ material, onOpen }: { material: MaterialRecord; onOpen: () => void }) {
   const accent = materialTypeWash(material.type);
-  const canOpen = hasPreviewModel(material.previewModelUrl);
   return (
     <button
       type="button"
-      disabled={!canOpen}
-      title={
-        canOpen ? undefined : "3D preview not available yet — publish a GLB in /public/assets/3d to unlock"
-      }
-      onClick={canOpen ? onOpen : undefined}
-      className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm disabled:cursor-not-allowed disabled:hover:shadow-sm disabled:active:scale-100 ${
-        canOpen ? `hover:shadow-md active:scale-[0.99] ${txInteract}` : ""
-      }`}
+      onClick={onOpen}
+      className={`flex w-full min-w-0 flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm hover:shadow-md active:scale-[0.99] ${txInteract}`}
     >
       <div className={`relative aspect-[4/3] w-full overflow-hidden rounded-t-[var(--br-200)] ${accent}`}>
         {material.thumbnailUrl ? (
@@ -240,7 +231,6 @@ function MaterialCard({ material, onOpen }: { material: MaterialRecord; onOpen: 
             </span>
           </div>
         )}
-        {!canOpen ? <AssetCardLockOverlay /> : null}
       </div>
       <div className="space-y-[var(--s-200)] px-[var(--s-300)] pb-[var(--s-400)] pt-[var(--s-400)]">
         <h2 className="text-[16px] font-semibold leading-snug text-[var(--text-default-heading)]">{material.name}</h2>

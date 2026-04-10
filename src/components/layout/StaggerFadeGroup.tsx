@@ -35,7 +35,7 @@ export function StaggerFadeGroup({
       {items.map((child, i) => (
         <div
           key={childKey(child, i)}
-          className="animate-stagger-fade-in opacity-0 [animation-fill-mode:forwards]"
+          className="min-w-0 w-full animate-stagger-fade-in opacity-0 [animation-fill-mode:forwards]"
           style={{ animationDelay: `${i * staggerMs}ms` }}
         >
           {child}

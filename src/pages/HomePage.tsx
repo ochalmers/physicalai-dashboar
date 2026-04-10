@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { RequestCustomSceneModal } from "@/components/environments/RequestCustomSceneModal";
 import { StaggerFadeGroup } from "@/components/layout/StaggerFadeGroup";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { TalkToTeamModal } from "@/components/contact/TalkToTeamModal";
 import { Badge } from "@/components/ui/Badge";
 import { MOCK_MATERIALS, MOCK_PROPS } from "@/data/mockCatalog";
@@ -14,15 +13,17 @@ const tx = "transition-[color,background-color,box-shadow,transform] duration-25
 const sectionTitle =
   "text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-default-heading)]";
 
-const typeCaption = "text-[12px] text-[var(--text-default-placeholder)]";
-
 const envShell =
   "group relative block w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left";
 
-const txOutline =
-  "inline-flex items-center gap-[var(--s-200)] rounded-br100 border border-[var(--border-primary-default)] bg-[var(--surface-default)] px-[var(--s-400)] py-[var(--s-200)] text-[14px] font-medium text-[var(--text-primary-default)] transition-[color,background-color,border-color] duration-200 hover:bg-[var(--surface-primary-default-subtle)]";
-
 const HOME_ENV_COUNT = 4;
+
+function daypartGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 const propsShowcase = MOCK_PROPS.slice(0, 5);
 const materialsShowcase = MOCK_MATERIALS.slice(0, 6);
@@ -31,39 +32,28 @@ export function HomePage() {
   const [requestOpen, setRequestOpen] = useState(false);
   const [talkOpen, setTalkOpen] = useState(false);
 
+  const homeEnvironments = useMemo(
+    () =>
+      ENVIRONMENT_CATALOG_PLACEHOLDERS.filter((e) => e.id !== "env-galley-kitchen").slice(0, HOME_ENV_COUNT),
+    [],
+  );
+
   return (
     <>
       <StaggerFadeGroup staggerMs={80} className="flex flex-col gap-[var(--s-600)] pb-[var(--s-600)] pt-[var(--s-100)]">
-        <PageHeader
-          title={
-            <>
-              Imagine.io{" "}
-              <span className="font-normal text-[var(--text-default-placeholder)]" aria-hidden>
-                ×
-              </span>{" "}
-              Physical AI
-            </>
-          }
-          description="Browse environments, props, and materials for simulation-ready scenes — configure spaces, generate variations, and export SimReady outputs."
-          actions={
-            <Link to="/assets" className={txOutline}>
-              Asset library
-              <span className="material-symbols-outlined text-[18px]" aria-hidden>
-                arrow_forward
-              </span>
-            </Link>
-          }
-        />
+        <header>
+          <h1 className="text-page-title text-[var(--text-default-heading)]">{daypartGreeting()}</h1>
+        </header>
 
         <section className="space-y-[var(--s-400)]" aria-labelledby="home-env-heading">
           <h2 id="home-env-heading" className={sectionTitle}>
             Environments
           </h2>
           <StaggerFadeGroup staggerMs={70} className="grid grid-cols-1 gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-4">
-            {ENVIRONMENT_CATALOG_PLACEHOLDERS.slice(0, HOME_ENV_COUNT).map((env) => {
+            {homeEnvironments.map((env) => {
               const href = environmentWorkspaceHref(env);
               const live = env.status === "active";
-              const thumb = env.catalogThumbnailUrl ?? "/assets/environments/galley-kitchen.jpg";
+              const thumb = env.catalogThumbnailUrl ?? "/assets/environments/open-plan-kitchen.jpg";
               const innerTop = (
                 <>
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--surface-page-secondary)]">
@@ -77,8 +67,11 @@ export function HomePage() {
                       {live ? (
                         <Badge variant="live">Live</Badge>
                       ) : (
-                        <span className="inline-flex items-center gap-[6px] rounded-full bg-[#2a2a2a] px-[10px] py-[6px] text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--grey-200)]">
-                          <span className="material-symbols-outlined text-[14px]" aria-hidden>
+                        <span className="inline-flex items-center justify-center gap-[4px] rounded-full bg-[#2a2a2a] px-[10px] py-[4px] text-[11px] font-semibold uppercase leading-none tracking-[0.06em] text-[var(--grey-200)]">
+                          <span
+                            className="material-symbols-outlined flex size-[14px] shrink-0 items-center justify-center text-[14px] leading-none"
+                            aria-hidden
+                          >
                             lock
                           </span>
                           Locked
@@ -88,7 +81,6 @@ export function HomePage() {
                   </div>
                   <div className="px-[var(--s-200)] pb-[var(--s-300)] pt-[var(--s-300)]">
                     <p className="text-[15px] font-semibold leading-tight text-[var(--text-default-heading)]">{env.name}</p>
-                    <p className={`mt-[var(--s-100)] ${typeCaption}`}>Environment</p>
                   </div>
                 </>
               );
@@ -139,7 +131,10 @@ export function HomePage() {
               View all
             </Link>
           </div>
-          <StaggerFadeGroup staggerMs={60} className="grid grid-cols-2 gap-[var(--s-400)] sm:grid-cols-3 lg:grid-cols-5">
+          <StaggerFadeGroup
+            staggerMs={60}
+            className="grid w-full grid-cols-2 gap-[var(--s-300)] sm:grid-cols-3 lg:grid-cols-5"
+          >
             {propsShowcase.map((p) => (
               <Link key={p.id} to="/assets/props" className={`group flex flex-col ${tx}`}>
                 <div className="relative aspect-square w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
@@ -149,8 +144,7 @@ export function HomePage() {
                     className="absolute inset-0 m-auto max-h-[88%] max-w-[88%] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                   />
                 </div>
-                <p className="mt-[var(--s-200)] text-center text-[13px] font-medium text-[var(--text-default-heading)]">{p.name}</p>
-                <p className={`text-center ${typeCaption}`}>Prop</p>
+                <p className="mt-[var(--s-200)] text-left text-[13px] font-medium text-[var(--text-default-heading)]">{p.name}</p>
               </Link>
             ))}
           </StaggerFadeGroup>
@@ -168,7 +162,10 @@ export function HomePage() {
               View all
             </Link>
           </div>
-          <StaggerFadeGroup staggerMs={50} className="grid grid-cols-2 gap-[var(--s-400)] sm:grid-cols-3 lg:grid-cols-6">
+          <StaggerFadeGroup
+            staggerMs={50}
+            className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,140px),1fr))] gap-[var(--s-300)]"
+          >
             {materialsShowcase.map((m) => (
               <Link key={m.id} to="/assets/materials" className={`group flex flex-col ${tx}`}>
                 <div className="relative aspect-square w-full overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-page-secondary)]">
@@ -178,8 +175,7 @@ export function HomePage() {
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                   />
                 </div>
-                <p className="mt-[var(--s-200)] text-center text-[13px] font-medium text-[var(--text-default-heading)]">{m.name}</p>
-                <p className={`text-center ${typeCaption}`}>Material</p>
+                <p className="mt-[var(--s-200)] text-left text-[13px] font-medium text-[var(--text-default-heading)]">{m.name}</p>
               </Link>
             ))}
           </StaggerFadeGroup>

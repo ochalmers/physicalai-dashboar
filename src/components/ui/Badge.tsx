@@ -26,7 +26,7 @@ export function Badge({
   } as const;
   return (
     <span
-      className={`inline-flex items-center rounded-full px-s200 py-s100 text-[10px] font-medium uppercase leading-none transition-[color,background-color] duration-250 ease-out ${map[variant]}`}
+      className={`inline-flex items-center justify-center rounded-full px-[10px] py-[4px] text-[11px] font-semibold uppercase leading-none tracking-[0.06em] transition-[color,background-color] duration-250 ease-out ${map[variant]}`}
     >
       {children}
     </span>

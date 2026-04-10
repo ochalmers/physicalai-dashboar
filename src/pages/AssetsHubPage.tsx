@@ -42,9 +42,9 @@ export function AssetsHubPage() {
       <div className="space-y-[var(--s-500)]">
         <Skeleton className="h-10 w-40" />
         <Skeleton className="h-10 w-64" />
-        <div className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-[var(--s-300)]">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-56" />
+            <Skeleton key={i} className="h-56 w-full min-w-0" />
           ))}
         </div>
       </div>
@@ -101,20 +101,22 @@ export function AssetsHubPage() {
 
       <StaggerFadeGroup
         staggerMs={150}
-        className="grid gap-[var(--s-400)] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        className="grid w-full grid-cols-[repeat(auto-fill,minmax(min(100%,200px),1fr))] gap-[var(--s-300)]"
       >
         {allCards.map((item) => {
-          const canOpen = hasPreviewModel(item.previewModelUrl);
+          const canOpen = item.kind === "material" || hasPreviewModel(item.previewModelUrl);
           return (
             <button
               key={`${item.kind}-${item.id}`}
               type="button"
               disabled={!canOpen}
               title={
-                canOpen ? undefined : "3D preview not available yet — publish a GLB in /public/assets/3d to unlock"
+                canOpen
+                  ? undefined
+                  : "3D preview not available yet — publish a GLB in /public/assets/3d to unlock"
               }
               onClick={canOpen ? () => setSelected({ kind: item.kind, id: item.id }) : undefined}
-              className={`flex flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm disabled:cursor-not-allowed disabled:hover:shadow-sm disabled:active:scale-100 ${
+              className={`flex w-full min-w-0 flex-col overflow-hidden rounded-br200 border border-[var(--border-default-secondary)] bg-[var(--surface-default)] text-left shadow-sm disabled:cursor-not-allowed disabled:hover:shadow-sm disabled:active:scale-100 ${
                 canOpen ? "transition-[box-shadow,transform] duration-250 ease-out hover:shadow-md active:scale-[0.99]" : ""
               }`}
             >

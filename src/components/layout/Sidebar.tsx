@@ -35,19 +35,19 @@ const envItems = [
   },
   {
     slug: "living-room",
-    label: "Living Room",
+    label: "Residential",
     live: false,
     thumbnail: "/assets/environments/livingroom.png",
   },
   {
     slug: "warehouse",
-    label: "Warehouse",
+    label: "Industrial",
     live: false,
     thumbnail: "/assets/environments/warehouse.png",
   },
   {
     slug: "retail-store",
-    label: "Retail Store",
+    label: "Retail",
     live: false,
     thumbnail: "/assets/environments/store.png",
   },
