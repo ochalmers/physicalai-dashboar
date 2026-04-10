@@ -141,7 +141,7 @@ export function HomePage() {
                   <img
                     src={p.thumbnailUrl}
                     alt=""
-                    className="absolute inset-0 m-auto max-h-[88%] max-w-[88%] object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   />
                 </div>
                 <p className="mt-[var(--s-200)] text-left text-[13px] font-medium text-[var(--text-default-heading)]">{p.name}</p>
