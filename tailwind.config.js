@@ -40,6 +40,16 @@ export default {
       transitionTimingFunction: {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
       },
+      keyframes: {
+        summaryRing: {
+          "0%": { boxShadow: "0 0 0 0 color-mix(in srgb, var(--papaya-500) 0%, transparent)" },
+          "35%": { boxShadow: "0 0 0 4px color-mix(in srgb, var(--papaya-500) 28%, transparent)" },
+          "100%": { boxShadow: "0 0 0 0 color-mix(in srgb, var(--papaya-500) 0%, transparent)" },
+        },
+      },
+      animation: {
+        summaryRing: "summaryRing 0.85s cubic-bezier(0.16, 1, 0.3, 1)",
+      },
     },
   },
   plugins: [],

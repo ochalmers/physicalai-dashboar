@@ -434,10 +434,17 @@ export function EnvironmentWorkspacePage() {
   }
 
   const isKitchen = meta.slug === "kitchen";
+  const kitchenConfigureFill = isKitchen && activeSection === "configure";
 
   return (
     <>
-      <div className="w-full max-w-none space-y-[var(--s-400)] lg:max-w-[1400px]">
+      <div
+        className={
+          kitchenConfigureFill
+            ? "flex w-full max-w-none flex-col gap-[var(--s-400)] lg:max-w-[1400px] md:min-h-0 md:flex-1"
+            : "w-full max-w-none space-y-[var(--s-400)] lg:max-w-[1400px]"
+        }
+      >
         {isKitchen ? (
           <header className="border-b border-[var(--border-default-secondary)] pb-[var(--s-400)]">
             <div className="flex items-start gap-[var(--s-300)]">
@@ -485,8 +492,8 @@ export function EnvironmentWorkspacePage() {
 
         <div
           className={
-            isKitchen && activeSection === "configure"
-              ? "min-h-[min(640px,calc(100dvh-13rem))] w-full pt-[var(--s-200)]"
+            kitchenConfigureFill
+              ? "min-h-0 w-full flex-1 overflow-hidden"
               : "min-h-[min(560px,calc(100dvh-20rem))] w-full pt-[var(--s-200)]"
           }
         >

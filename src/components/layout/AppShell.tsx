@@ -2,15 +2,23 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { usePresence } from "@/hooks/usePresence";
 import { txOverlayBackdrop } from "./motion";
-import { AskImagineDock } from "@/components/assistant/AskImagineDock";
+import { AskImagineProvider } from "@/components/assistant/AskImagineDock";
 import { AppTopBar } from "./AppTopBar";
 import { mainOffsetFromSidebarClass } from "./sidebarLayout";
 import { PageTransition } from "./PageTransition";
 import { Sidebar } from "./Sidebar";
 
+function cn(...parts: (string | false | undefined)[]) {
+  return parts.filter(Boolean).join(" ");
+}
+
+/** Kitchen configure: fill viewport on md+; only the options column scrolls inside the workspace */
+const KITCHEN_CONFIGURE_PATH = /^\/environments\/kitchen\/configure$/;
+
 export function AppShell() {
   const location = useLocation();
   const contentWidthClass = "mx-auto w-full max-w-[1250px]";
+  const kitchenConfigureFill = KITCHEN_CONFIGURE_PATH.test(location.pathname);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { mounted: backdropMounted, show: backdropShow } = usePresence(mobileNavOpen);
 
@@ -37,6 +45,7 @@ export function AppShell() {
   }, [backdropMounted]);
 
   return (
+    <AskImagineProvider>
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--surface-page)]">
       <Sidebar mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
@@ -54,16 +63,25 @@ export function AppShell() {
       <div className={`flex min-h-0 min-w-0 flex-1 flex-col ${mainOffsetFromSidebarClass}`}>
         <AppTopBar onOpenNav={() => setMobileNavOpen(true)} navOpen={mobileNavOpen} />
 
-        <main className="w-full max-w-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-[var(--s-300)] pb-[max(var(--s-500),env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-400))] sm:px-[var(--s-400)] md:px-[var(--s-600)] md:pb-[var(--s-500)] md:pt-[max(var(--s-500),env(safe-area-inset-top))] [-webkit-overflow-scrolling:touch]">
-          <PageTransition>
-            <div className={contentWidthClass}>
+        <main
+          className={cn(
+            "w-full max-w-none min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-[var(--s-300)] pb-[max(var(--s-500),env(safe-area-inset-bottom))] pt-[calc(3.5rem+env(safe-area-inset-top)+var(--s-400))] sm:px-[var(--s-400)] md:px-[var(--s-600)] md:pb-[var(--s-500)] md:pt-[max(var(--s-500),env(safe-area-inset-top))] [-webkit-overflow-scrolling:touch]",
+            kitchenConfigureFill && "flex flex-col md:overflow-hidden",
+          )}
+        >
+          <PageTransition className={kitchenConfigureFill ? "flex min-h-0 w-full flex-1 flex-col" : undefined}>
+            <div
+              className={cn(
+                contentWidthClass,
+                kitchenConfigureFill && "flex min-h-0 flex-1 flex-col",
+              )}
+            >
               <Outlet />
             </div>
           </PageTransition>
         </main>
       </div>
-
-      <AskImagineDock />
     </div>
+    </AskImagineProvider>
   );
 }

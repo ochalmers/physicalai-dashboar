@@ -33,13 +33,32 @@ export function computeKitchenSceneSummary(values: Record<KitchenParamKey, strin
   else if (clutter === "Moderate") models += 4;
 
   const wall = values["Wall Cabinet"];
-  if (wall.includes("Microwave")) models += 3;
+  if (wall === "Microwave Cabinet") {
+    models += 4;
+  } else if (wall === "Double Door") {
+    models += 2;
+  } else {
+    models += 1;
+  }
+
   const tall = values["Tall Cabinet"];
-  if (tall.includes("Refrigerator") || tall.includes("Oven")) models += 4;
+  if (tall === "Single Door") {
+    models += 2;
+  } else if (tall === "Double Door") {
+    models += 3;
+  } else if (tall === "Oven Cabinet") {
+    models += 7;
+  } else if (tall === "Refrigerator Cabinet") {
+    models += 5;
+  }
 
   const base = values["Base Cabinet"];
   if (base.includes("Oven")) models += 2;
   if (base.includes("Drawer")) models += 2;
+
+  const doorStyle = values["Door Style"];
+  if (doorStyle === "Slab") models -= 1;
+  else if (doorStyle === "Raised Panel" || doorStyle === "Recessed Panel") models += 2;
 
   let joints = 10;
   if (layout === "U-Shaped") joints += 10;
@@ -49,8 +68,13 @@ export function computeKitchenSceneSummary(values: Record<KitchenParamKey, strin
 
   if (island !== "No Island") joints += 6;
   if (base.includes("Drawer")) joints += Math.min(12, (base.match(/Drawer/g) ?? []).length * 3);
-  if (tall.includes("Oven") || tall.includes("Refrigerator")) joints += 4;
-  joints += wall.includes("Microwave") ? 2 : 0;
+
+  if (tall === "Single Door") joints += 2;
+  else if (tall === "Double Door") joints += 3;
+  else if (tall === "Oven Cabinet") joints += 7;
+  else if (tall === "Refrigerator Cabinet") joints += 5;
+
+  joints += wall === "Microwave Cabinet" ? 3 : wall === "Double Door" ? 1 : 0;
 
   const doorHandle = values["Door Handle"];
   if (doorHandle !== "None") joints += 8;
@@ -62,6 +86,8 @@ export function computeKitchenSceneSummary(values: Record<KitchenParamKey, strin
   if (lighting === "Dim Artificial") fpsBase -= 4;
   if (lighting === "Warm Evening") fpsBase -= 2;
   if (clutter === "Dense") fpsBase -= 3;
+  if (values["Tall Cabinet"] === "Oven Cabinet") fpsBase -= 2;
+  if (values["Wall Cabinet"] === "Microwave Cabinet") fpsBase -= 1;
   const isaacFps = fpsBase >= 70 ? "70+" : `${Math.max(58, fpsBase)}`;
 
   const modelsRounded = Math.min(120, Math.max(18, Math.round(models)));

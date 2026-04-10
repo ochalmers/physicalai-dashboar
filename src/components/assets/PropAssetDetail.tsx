@@ -91,7 +91,7 @@ export function PropAssetDetail({
         <div className="space-y-[var(--s-300)] pt-[var(--s-200)]" role="group" aria-label="Download options">
           <Button
             variant="primary"
-            className={`w-full ${txBtn}`}
+            className={`w-full text-[14px] font-semibold ${txBtn}`}
             aria-haspopup={!downloadOk ? "dialog" : undefined}
             onClick={() =>
               run(() => {
@@ -105,11 +105,11 @@ export function PropAssetDetail({
                 lock
               </span>
             ) : null}
-            Download SimReady USD
+            Download USD Scene
           </Button>
           <Button
             variant="secondary"
-            className={`w-full border-[var(--border-primary-default)] text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] ${txBtn}`}
+            className={`w-full border-[var(--border-primary-default)] bg-[var(--surface-default)] text-[14px] font-semibold text-[var(--text-primary-default)] hover:bg-[var(--surface-primary-default-subtle)] ${txBtn}`}
             aria-haspopup={!downloadOk ? "dialog" : undefined}
             onClick={() =>
               run(() => {
@@ -123,7 +123,7 @@ export function PropAssetDetail({
                 lock
               </span>
             ) : null}
-            Download GLB
+            Download GLB Preview
           </Button>
           <div className="flex justify-center pt-[var(--s-100)]">
             <button
